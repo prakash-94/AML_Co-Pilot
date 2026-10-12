@@ -44,3 +44,9 @@ Thumbs.db
 
 # Terraform plans can contain resolved values
 *.tfplan
+
+# Build output
+build/
+dist/
+*.egg-info/
+.databricks/

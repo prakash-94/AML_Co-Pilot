@@ -1,3 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aml-copilot"
+version = "0.1.0"
+description = "AML Investigation Copilot: evidence, typology (RAG), narrative and faithfulness agents"
+requires-python = ">=3.11"
+# Dependencies are pinned by the requirements files (laptop, CI) and the Databricks job environment, not here.
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["aml_copilot*"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

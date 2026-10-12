@@ -1,19 +1,22 @@
 name: deploy
 
-# Manual trigger. One-time setup:
-#   1. terraform apply -var github_repo=<owner>/<repo> -var deploy_services=true   (creates the keyless login)
-#   2. Repository Settings > Secrets and variables > Actions > Variables:
-#        GCP_PROJECT_ID, GCP_WORKLOAD_IDENTITY_PROVIDER, GCP_DEPLOY_SERVICE_ACCOUNT
-#      (the last two are printed by terraform as github_workload_identity_provider / github_deployer_service_account)
-#   3. Settings > Environments > "production" > add yourself as a required reviewer (that is the approval gate).
-# No key files anywhere: GitHub proves its identity to Google through Workload Identity Federation, and the
-# deployer account can build and roll out images but cannot change infrastructure.
+# Deploys the Databricks bundle (jobs, reporting pipeline, code, wheel). Manual trigger, with an approval gate.
+# One-time setup in the repository (Settings > Secrets and variables > Actions):
+#   Secrets:   DATABRICKS_HOST   e.g. https://dbc-xxxx.cloud.databricks.com
+#              DATABRICKS_TOKEN  a personal access token for the deploying user (set a short expiry, rotate it)
+#   Variables: DATABRICKS_WAREHOUSE_HTTP_PATH, DATABRICKS_CLIENT_ID (the service principal's application id),
+#              SF_USERNAME
+# and Settings > Environments > "production" with a required reviewer (that is the approval).
 on:
   workflow_dispatch:
+    inputs:
+      smoke_account:
+        description: "Run one investigation after deploying (e.g. ACC-H-00000). Leave empty to skip."
+        required: false
+        default: ""
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency: deploy
 
@@ -36,34 +39,29 @@ jobs:
     runs-on: ubuntu-latest
     environment: production # pauses here until a required reviewer approves
     env:
-      PROJECT: ${{ vars.GCP_PROJECT_ID }}
-      REGION: us-central1
-      IMAGE: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/aml/aml-copilot:${{ github.sha }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      BUNDLE_VAR_warehouse_http_path: ${{ vars.DATABRICKS_WAREHOUSE_HTTP_PATH }}
+      BUNDLE_VAR_databricks_client_id: ${{ vars.DATABRICKS_CLIENT_ID }}
+      BUNDLE_VAR_sf_username: ${{ vars.SF_USERNAME }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: google-github-actions/auth@v2
+      - uses: actions/setup-python@v5
         with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          python-version: "3.11"
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Install the build tool (the bundle builds the wheel with `python -m build`)
+        run: pip install build
 
-      - name: Build the image in Cloud Build (tagged with the commit)
-        run: |
-          gcloud builds submit --config cloudbuild.yaml --project "$PROJECT" \
-            --substitutions=_IMAGE="$IMAGE",_GIT_SHA="${{ github.sha }}" .
+      - uses: databricks/setup-cli@main
 
-      # The commit id is baked into the image (Dockerfile ARG GIT_SHA -> ENV BUILD_SHA), so /status shows it.
-      - name: Roll out the worker, then the API, then the evaluation job
-        run: |
-          gcloud run services update aml-worker --region "$REGION" --project "$PROJECT" --image "$IMAGE"
-          gcloud run services update aml-api --region "$REGION" --project "$PROJECT" --image "$IMAGE"
-          gcloud run jobs update aml-eval --region "$REGION" --project "$PROJECT" --image "$IMAGE"
+      - name: Validate the bundle
+        run: databricks bundle validate
 
-      - name: Smoke test - the live API reports the commit we just deployed
-        run: |
-          URL=$(gcloud run services describe aml-api --region "$REGION" --project "$PROJECT" --format='value(status.url)')
-          curl --fail --silent --show-error "$URL/status" | tee status.json
-          grep -q "${{ github.sha }}" status.json
-          test "$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/investigations")" = "401"
+      - name: Deploy (jobs, pipeline, code, wheel)
+        run: databricks bundle deploy
+
+      - name: Smoke test - run one investigation and require it to finish
+        if: ${{ inputs.smoke_account != '' }}
+        run: databricks bundle run investigate --params account_id=${{ inputs.smoke_account }}

@@ -6,7 +6,6 @@ with; the service principal that does it holds MODIFY on this one table and noth
 """
 
 from collections.abc import Callable, Sequence
-from contextlib import closing
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -69,10 +68,11 @@ def _safe_table(name: str) -> str:
 
 
 class DeltaSink:
-    """Appends rows to a Delta table over a Databricks SQL connection (`open_connection` is injectable)."""
+    """Appends rows to a Delta table. `execute(statement, params)` runs one statement - a Spark session's `sql`
+    inside Databricks (see `aml_copilot.service.delta.spark_sql`), the SQL connector anywhere else."""
 
-    def __init__(self, open_connection: Callable[[], Any], table: str):
-        self._open = open_connection
+    def __init__(self, execute: Callable[[str, dict[str, Any]], Any], table: str):
+        self._execute = execute
         self._table = _safe_table(table)
 
     def write(self, rows: Sequence[dict[str, Any]]) -> None:
@@ -81,9 +81,8 @@ class DeltaSink:
         names = ", ".join(COLUMNS)
         placeholders = ", ".join("CAST(:run_at AS TIMESTAMP)" if c == "run_at" else f":{c}" for c in COLUMNS)
         statement = f"INSERT INTO {self._table} ({names}) VALUES ({placeholders})"
-        with closing(self._open()) as connection, connection.cursor() as cursor:
-            for row in rows:
-                cursor.execute(statement, {c: row[c] for c in COLUMNS})
+        for row in rows:
+            self._execute(statement, {c: row[c] for c in COLUMNS})
 
 
 __all__ = ["COLUMNS", "CREATE_TABLE_SQL", "DeltaSink", "InMemorySink", "ResultSink", "RunInfo", "result_row"]

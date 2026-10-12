@@ -6,6 +6,7 @@ pattern used throughout this project for everything external, so tests can run w
 downloading the real ~80MB model.
 """
 
+import os
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import lru_cache
@@ -18,8 +19,18 @@ from aml_copilot.errors import IndexNotBuiltError
 from aml_copilot.retrieval.chunking import Chunk, ChunkConfig, chunk_document
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOURCE_DIR = PROJECT_ROOT / "typology_docs"
-DEFAULT_PERSIST_DIR = PROJECT_ROOT / ".chroma"
+# Where the typology documents and the built index live. On a laptop or in the Docker image they sit next to the
+# code; when the package is installed as a wheel (Databricks) the job points these at a Unity Catalog Volume and a
+# scratch folder through the environment. Read at call time, so a job can set them after importing the package.
+def default_source_dir() -> Path:
+    return Path(os.environ.get("AML_TYPOLOGY_DIR") or PROJECT_ROOT / "typology_docs")
+
+
+def default_persist_dir() -> Path:
+    return Path(os.environ.get("AML_CHROMA_DIR") or PROJECT_ROOT / ".chroma")
+
+
+DEFAULT_SOURCE_DIR = PROJECT_ROOT / "typology_docs"  # the in-repo default, kept for tests and docs
 COLLECTION_NAME = "typology_docs"
 
 # The folder holds more than typologies. The README documents the folder itself and is never
@@ -94,13 +105,14 @@ def _collect_chunks(source_dir: Path, config: ChunkConfig | None = None) -> list
 
 
 def build_index(
-    source_dir: Path = DEFAULT_SOURCE_DIR,
-    persist_dir: Path = DEFAULT_PERSIST_DIR,
+    source_dir: Path | None = None,
+    persist_dir: Path | None = None,
     embed_fn: EmbedFn | None = None,
     chunk_config: ChunkConfig | None = None,
 ) -> int:
     """(Re)build the collection from every document in `source_dir`. Returns the chunk count."""
     embed_fn = embed_fn or default_embedder()
+    source_dir, persist_dir = source_dir or default_source_dir(), persist_dir or default_persist_dir()
     chunks = _collect_chunks(source_dir, chunk_config)
     if not chunks:
         raise ValueError(f"No documents found in {source_dir}")
@@ -126,13 +138,13 @@ def build_index(
 def search(
     query: str,
     top_k: int = 5,
-    persist_dir: Path = DEFAULT_PERSIST_DIR,
+    persist_dir: Path | None = None,
     embed_fn: EmbedFn | None = None,
     doc_type: str | None = None,
 ) -> list[RetrievedChunk]:
     """Nearest chunks to `query`. Pass `doc_type="typology"` to search typologies only."""
     embed_fn = embed_fn or default_embedder()
-    client = chromadb.PersistentClient(path=str(persist_dir))
+    client = chromadb.PersistentClient(path=str(persist_dir or default_persist_dir()))
     try:
         collection = client.get_collection(COLLECTION_NAME)
     except NotFoundError as exc:

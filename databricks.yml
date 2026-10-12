@@ -1,0 +1,197 @@
+# Databricks Asset Bundle: everything that runs on Databricks.
+#   databricks bundle validate / deploy        (scripts/dbx_deploy.py does this using your .env)
+#
+#   aml-investigate    job   one investigation per run (parameters: account_id)     <- the application
+#   aml-canary         job   weekly quality check, then refreshes the reports
+#   aml-refresh-reports job  daily refresh of the reporting pipeline
+#   aml-reporting      pipeline  Lakeflow declarative pipeline: materialized views for dashboards
+#   databricks/notebooks/review   the human approval step (runs as the reviewer)
+bundle:
+  name: aml_copilot
+
+variables:
+  warehouse_http_path:
+    description: HTTP path of the SQL warehouse that serves the transactions view
+  databricks_client_id:
+    description: Application id of the service principal that reads the transactions view
+  sf_username:
+    description: Salesforce user name (not secret; the password lives in the secret scope)
+  transactions_table:
+    default: workspace.aml_copilot.transactions_safe
+  evidence_model:
+    default: claude-haiku-4-5
+  judge_model:
+    default: claude-sonnet-5
+  daily_limit:
+    default: "30"
+  canary_cap_usd:
+    default: "0.6"
+
+artifacts:
+  aml_copilot_wheel:
+    type: whl
+    build: python -m build --wheel
+    path: .
+
+sync:
+  exclude:
+    - tests
+    - infra
+    - docs
+    - sample_runs
+    - evaluation_results
+    - web
+    - scripts
+    - "customer_profiles*.csv"
+    - "*.docx"
+    - Dockerfile
+    - cloudbuild.yaml
+    - firebase.json
+
+# Every task receives the non-secret settings as --set KEY=VALUE pairs; secrets come from the secret scope `aml-copilot`.
+
+resources:
+  jobs:
+    investigate:
+      name: aml-investigate
+      description: Investigate one account and store a draft for human review. Run with account_id.
+      max_concurrent_runs: 1 # the service rules assume one run at a time (see aml_copilot/service/delta.py)
+      queue:
+        enabled: true
+      timeout_seconds: 3600
+      parameters:
+        - name: account_id
+          default: ""
+        - name: requested_by
+          default: ""
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - "-r ${workspace.file_path}/databricks/requirements.txt"
+              - ./dist/*.whl
+      tasks:
+        - task_key: investigate
+          environment_key: default
+          spark_python_task:
+            python_file: databricks/jobs/investigate.py
+            parameters:
+              - "--account-id"
+              - "{{job.parameters.account_id}}"
+              - "--requested-by"
+              - "{{job.parameters.requested_by}}"
+              - "--daily-limit"
+              - ${var.daily_limit}
+              - "--set"
+              - "LLM_PROVIDER=anthropic"
+              - "--set"
+              - "ANTHROPIC_MODEL=${var.evidence_model}"
+              - "--set"
+              - "TYPOLOGY_MODEL=${var.judge_model}"
+              - "--set"
+              - "NARRATIVE_MODEL=${var.judge_model}"
+              - "--set"
+              - "FAITHFULNESS_MODEL=${var.judge_model}"
+              - "--set"
+              - "DATABRICKS_SERVER_HOSTNAME=${workspace.host}"
+              - "--set"
+              - "DATABRICKS_HTTP_PATH=${var.warehouse_http_path}"
+              - "--set"
+              - "DATABRICKS_CLIENT_ID=${var.databricks_client_id}"
+              - "--set"
+              - "DATABRICKS_TRANSACTIONS_TABLE=${var.transactions_table}"
+              - "--set"
+              - "SF_USERNAME=${var.sf_username}"
+              - "--set"
+              - "AML_TYPOLOGY_DIR=${workspace.file_path}/typology_docs"
+              - "--set"
+              - "AML_CHROMA_DIR=/tmp/aml_chroma"
+              - "--set"
+              - "LOG_FORMAT=json"
+
+    canary:
+      name: aml-canary
+      description: Weekly quality check on 7 accounts; stores results in eval_runs and fails if quality drops.
+      max_concurrent_runs: 1
+      timeout_seconds: 7200
+      schedule:
+        quartz_cron_expression: "0 0 6 ? * MON"
+        timezone_id: UTC
+        pause_status: UNPAUSED
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - "-r ${workspace.file_path}/databricks/requirements.txt"
+              - ./dist/*.whl
+      tasks:
+        - task_key: canary
+          environment_key: default
+          spark_python_task:
+            python_file: databricks/jobs/canary.py
+            parameters:
+              - "--cap"
+              - ${var.canary_cap_usd}
+              - "--set"
+              - "LLM_PROVIDER=anthropic"
+              - "--set"
+              - "ANTHROPIC_MODEL=${var.evidence_model}"
+              - "--set"
+              - "TYPOLOGY_MODEL=${var.judge_model}"
+              - "--set"
+              - "NARRATIVE_MODEL=${var.judge_model}"
+              - "--set"
+              - "FAITHFULNESS_MODEL=${var.judge_model}"
+              - "--set"
+              - "DATABRICKS_SERVER_HOSTNAME=${workspace.host}"
+              - "--set"
+              - "DATABRICKS_HTTP_PATH=${var.warehouse_http_path}"
+              - "--set"
+              - "DATABRICKS_CLIENT_ID=${var.databricks_client_id}"
+              - "--set"
+              - "DATABRICKS_TRANSACTIONS_TABLE=${var.transactions_table}"
+              - "--set"
+              - "SF_USERNAME=${var.sf_username}"
+              - "--set"
+              - "AML_TYPOLOGY_DIR=${workspace.file_path}/typology_docs"
+              - "--set"
+              - "AML_CHROMA_DIR=/tmp/aml_chroma"
+              - "--set"
+              - "LOG_FORMAT=json"
+        - task_key: refresh_reports
+          depends_on:
+            - task_key: canary
+          run_if: ALL_DONE # refresh even when the canary reported a regression, so the dashboard shows it
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.reporting.id}
+
+    refresh_reports:
+      name: aml-refresh-reports
+      description: Daily refresh of the reporting pipeline.
+      schedule:
+        quartz_cron_expression: "0 0 7 * * ?"
+        timezone_id: UTC
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: refresh
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.reporting.id}
+
+  pipelines:
+    reporting:
+      name: aml-reporting
+      serverless: true
+      catalog: workspace
+      schema: aml_copilot
+      libraries:
+        - file:
+            path: databricks/pipelines/reporting.sql
+
+targets:
+  prod:
+    default: true
+    mode: production
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/prod

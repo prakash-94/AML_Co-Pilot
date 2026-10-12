@@ -475,6 +475,8 @@ def test_the_delta_sink_inserts_one_parameterised_row_per_result():
     executed = []
 
     class Cursor:
+        description = None
+
         def __enter__(self):
             return self
 
@@ -492,7 +494,9 @@ def test_the_delta_sink_inserts_one_parameterised_row_per_result():
             pass
 
     rows = [result_row(score_case(make_case("L", n), good_state()), sink_info()) for n in range(2)]
-    DeltaSink(Connection, "workspace.aml_copilot.eval_runs").write(rows)
+    from aml_copilot.service.delta import connector_sql
+
+    DeltaSink(connector_sql(Connection), "workspace.aml_copilot.eval_runs").write(rows)
     assert len(executed) == 2
     statement, params = executed[0]
     assert statement.startswith("INSERT INTO `workspace`.`aml_copilot`.`eval_runs`")

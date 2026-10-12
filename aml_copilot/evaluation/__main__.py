@@ -86,10 +86,18 @@ def cmd_run(args: argparse.Namespace) -> None:
 
 
 def make_sink(name: str, settings: Settings, table: str) -> ResultSink:
+    """`delta` writes over the SQL connector (a laptop, CI, Cloud Run); `spark` uses the job's own Spark session."""
     if name == "delta":
         from aml_copilot.ingestion.sources import DatabricksSource
+        from aml_copilot.service.delta import connector_sql
 
-        return DeltaSink(DatabricksSource(settings)._open, table)
+        return DeltaSink(connector_sql(DatabricksSource(settings)._open), table)
+    if name == "spark":
+        from databricks.sdk.runtime import spark
+
+        from aml_copilot.service.delta import spark_sql
+
+        return DeltaSink(spark_sql(spark), table)
     return InMemorySink()
 
 
@@ -210,7 +218,7 @@ def main(argv: list[str]) -> int:
     canary.add_argument("--per-family", default="N=2,S=2,L=2,H=1")
     canary.add_argument("--seed", type=int, default=7)
     canary.add_argument("--cap", type=float, default=0.6)
-    canary.add_argument("--sink", choices=["none", "delta"], default="none")
+    canary.add_argument("--sink", choices=["none", "delta", "spark"], default="none")
     canary.add_argument("--table", default="workspace.aml_copilot.eval_runs")
     canary.add_argument("--yes", action="store_true")
     canary.set_defaults(handler=cmd_canary)

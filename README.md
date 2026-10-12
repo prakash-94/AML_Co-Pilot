@@ -45,30 +45,38 @@ project, not a compliance product.
 Not measured: behaviour on real bank data, agreement with human investigators, latency under load. The sample
 is small and synthetic; treat these as regression baselines, not accuracy claims.
 
-## The deployed system (Google Cloud)
+## The deployed system (Databricks)
+
+Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.yml`). There is no web server.
 
 ```
- Browser ─ Firebase Hosting ─┬─ web/  (sign-in, submit, review, audit view)
-                             └─ /api/** ─► Cloud Run "aml-api"  (checks the Firebase token on every call)
-                                              │ job + quota + duplicate lock (Firestore transaction)
-                                              │ audit event (Cloud Storage, write-once, hash-chained)
-                                              ▼
-                                         Cloud Tasks ─► Cloud Run "aml-worker" (private) ─► the pipeline
- Cloud Scheduler (weekly) ─► Cloud Run Job "aml-eval" ─► 7-account canary ─► Delta table eval_runs
+ You ── Run now (account_id) ──► Job "aml-investigate"  (serverless Python, one run at a time)
+                                   │ reads   Unity Catalog view transactions_safe (no label column), Salesforce, Supabase
+                                   │ calls   Claude through the Anthropic API (keys in a Databricks secret scope)
+                                   │ writes  Delta: documents (job + draft), audit_objects (append-only, hash-chained)
+ You ── open notebook ─────────► "review": list / show / approve / reject / escalate   (runs AS the reviewer)
+ Schedule (Mon 06:00 UTC) ─────► Job "aml-canary" ─► 7-account quality check ─► Delta eval_runs ─► fails on regression
+ Schedule (daily 07:00 UTC) ───► Job "aml-refresh-reports" ─► Lakeflow pipeline "aml-reporting" (materialized views)
 ```
 
-* **Roles**: investigators can reject or escalate; only supervisors can approve. The role is a signed claim.
-* **A job runs once** (Cloud Tasks delivers at least once; a transactional claim makes a duplicate harmless).
-* **A decision is final** and bound to the exact draft by its SHA-256, so approving a stale draft is refused.
-* **Audit trail**: each event includes the hash of the previous one; the bucket's retention policy blocks
-  overwriting or deleting objects (tested). `GET /api/investigations/{id}/audit` verifies the chain.
-* **Data governance**: the app reads Databricks as a service principal that can `SELECT` only a view
-  (`transactions_safe`) with no label column; the base table and the label are refused (tested live).
-* **Brakes on spend**: daily investigation limit, max 2 instances, one task attempt, per-run caps, $15 budget alert.
-* **Alerts** (email): 5xx errors, queue backlog, crashed investigations, a failed weekly quality check.
-* The quality check fails (and alerts) if a tier or typology is wrong or fewer than 90% of draft sentences are supported.
+* **Jobs, not servers.** One investigation is one job run. The job validates the account id, applies the daily limit
+  and the one-open-run-per-account rule, runs the four agents, stores the draft (never the raw rows) and writes the
+  audit trail. A crash is recorded on the job and the run fails visibly.
+* **State in Delta.** `documents` holds job records with versioned, optimistic writes (`MERGE` that only succeeds if the
+  version still matches). `audit_objects` is created with `delta.appendOnly = true`, so Delta itself refuses UPDATE and
+  DELETE; each event carries the hash of the one before it.
+* **Human decision.** The review notebook runs as the person who opens it, so the reviewer's identity is their real
+  Databricks login, not a typed name. Roles come from the `reviewers` table; only a supervisor can approve. A decision
+  is final and is tied to the exact draft by its SHA-256, so approving a draft that changed is refused.
+* **Data governance.** Jobs read transactions as a service principal that can `SELECT` only the `transactions_safe`
+  view. The ground-truth label and the base table are refused (tested live).
+* **Reporting pipeline.** A Lakeflow declarative pipeline builds `investigations_flat`, `investigations_daily`,
+  `canary_trend` and `audit_chain_links` (a SQL check that every audit event points at the previous one).
+* **Quality gate.** The weekly canary fails the job if a tier or typology is wrong or fewer than 90% of draft
+  sentences are supported.
 
-Deploy and operate: see [`docs/deploy.md`](docs/deploy.md). Infrastructure is Terraform in `infra/`.
+Deploy and operate: [`docs/databricks.md`](docs/databricks.md). An earlier Google Cloud Run deployment of the same
+service rules is described in [`docs/deploy.md`](docs/deploy.md) and is being retired.
 
 ## Running it locally
 
@@ -76,7 +84,7 @@ Deploy and operate: see [`docs/deploy.md`](docs/deploy.md). Infrastructure is Te
 py -3.11 -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt           # copy .env.example to .env and fill it in first
 python -m aml_copilot.agents.investigation ACC-H-00000          # one investigation on the command line
-uvicorn aml_copilot.service.app:app --port 8080                  # the API with in-memory storage + dev tokens
+uvicorn aml_copilot.service.app:app --port 8080                  # optional: the HTTP API with in-memory storage + dev tokens
 pytest -q                                                       # 550 tests, no network or API keys needed
 ```
 
@@ -91,14 +99,18 @@ detects Cloud Run.
 | `aml_copilot/agents` | evidence, typology, narrative agents and the LangGraph orchestrator |
 | `aml_copilot/retrieval`, `typology_docs/` | chunking, embeddings, vector store; the typology corpus |
 | `aml_copilot/guardrails`, `evaluation` | faithfulness + consistency checks; the evaluation harness and canary |
-| `aml_copilot/service` | jobs, audit chain, auth, API, worker, Google Cloud adapters |
-| `web/`, `infra/`, `scripts/`, `Dockerfile`, `cloudbuild.yaml` | page, Terraform, helper scripts, image build |
+| `aml_copilot/service` | job rules, audit chain, Delta adapters (+ an optional HTTP API and Google Cloud adapters) |
+| `aml_copilot/dbx` | the Databricks job entry points, review logic, secret loading |
+| `databricks.yml`, `databricks/` | the bundle: jobs, reporting pipeline (SQL), review notebook |
+| `scripts/` | deploy and secret helpers; `infra/`, `web/`, `Dockerfile` are the retiring Cloud Run deployment |
 
 ## Known limits
 
 * Only two typologies (structuring, layering) have rule-based detectors; the other five are retrieved by
   similarity only and are marked "no detector yet".
-* Claude on Vertex AI is implemented and tested offline, but Google has not granted quota to this project, so the
-  deployment uses the Anthropic API (`LLM_PROVIDER=vertex` switches it).
-* The Databricks service principal's OAuth secret expires after 90 days and must be rotated.
-* Audit retention is 7 days and unlocked on purpose (locking is irreversible); lock it for production.
+* Databricks Free Edition has no Claude models, so Claude is called through the Anthropic API from the job. Claude on
+  Vertex AI is implemented and tested offline, but Google has not granted this project quota.
+* The workspace has one user, so the roles are demonstrated with a `reviewers` table rather than several logins.
+* The service principal's OAuth secret expires after 90 days and must be rotated.
+* Each investigation job installs its libraries on start-up, so a run takes several minutes before the first query.
+* Free Edition may delete an inactive workspace; the weekly canary doubles as a heartbeat.

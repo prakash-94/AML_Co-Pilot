@@ -1,0 +1,4 @@
+# Libraries for the Databricks job environment (serverless). CPU-only torch is taken from PyTorch's CPU index.
+--extra-index-url https://download.pytorch.org/whl/cpu
+-r ../requirements-core.txt
+sentence-transformers>=6.1,<7

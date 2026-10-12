@@ -9,7 +9,7 @@ embeddings, same answer every time.
 from collections.abc import Iterable
 from pathlib import Path
 
-from aml_copilot.retrieval.store import DEFAULT_SOURCE_DIR
+from aml_copilot.retrieval.store import default_source_dir
 
 SECTION_HEADING = "## Investigation questions"
 
@@ -18,12 +18,12 @@ SECTION_HEADING = "## Investigation questions"
 _COMPANION_DOCUMENT = {"fatf_hawala_hossp_2013.pdf": "hawala_informal_value_transfer.md"}
 
 
-def load_investigation_questions(source_name: str, source_dir: Path = DEFAULT_SOURCE_DIR) -> list[str]:
+def load_investigation_questions(source_name: str, source_dir: Path | None = None) -> list[str]:
     """The questions in one typology document, or [] if it has none (or is not a document here)."""
     source_name = _COMPANION_DOCUMENT.get(source_name, source_name)
     if Path(source_name).name != source_name:  # a bare filename only - never a path
         return []
-    path = source_dir / source_name
+    path = (source_dir or default_source_dir()) / source_name
     if path.suffix.lower() not in (".md", ".markdown") or not path.is_file():
         return []
 
@@ -41,7 +41,7 @@ def load_investigation_questions(source_name: str, source_dir: Path = DEFAULT_SO
     return questions
 
 
-def questions_for_sources(sources: Iterable[str], source_dir: Path = DEFAULT_SOURCE_DIR) -> list[str]:
+def questions_for_sources(sources: Iterable[str], source_dir: Path | None = None) -> list[str]:
     """Questions for several documents, in order, with duplicates removed."""
     merged: list[str] = []
     for source in sources:

@@ -1,10 +1,10 @@
 """Loading investigation questions straight from the typology markdown files."""
 
 from aml_copilot.retrieval.questions import (
-    DEFAULT_SOURCE_DIR,
     load_investigation_questions,
     questions_for_sources,
 )
+from aml_copilot.retrieval.store import DEFAULT_SOURCE_DIR
 
 DOC = """# Structuring
 
