@@ -82,3 +82,54 @@ output "github_workload_identity_provider" {
 output "github_deployer_service_account" {
   value = var.github_repo == "" ? null : google_service_account.deployer[0].email
 }
+
+# ---------------------------------------------------------------------------- the build account
+# Cloud Build runs as this small account instead of the project's broad default one, so a deployer who may
+# "act as" it can run builds but gains no other power.
+resource "google_service_account" "builder" {
+  account_id   = "aml-builder"
+  display_name = "AML Copilot image builds"
+}
+
+resource "google_project_iam_member" "builder_roles" {
+  for_each = toset(["roles/artifactregistry.writer", "roles/logging.logWriter"])
+  project  = var.project_id
+  role     = each.value
+  member   = google_service_account.builder.member
+}
+
+resource "google_storage_bucket_iam_member" "builder_reads_source" {
+  bucket = "${var.project_id}_cloudbuild"
+  role   = "roles/storage.objectViewer"
+  member = google_service_account.builder.member
+}
+
+resource "google_service_account_iam_member" "deployer_acts_as_builder" {
+  count              = var.github_repo == "" ? 0 : 1
+  service_account_id = google_service_account.builder.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.deployer[0].member
+}
+
+# gcloud looks the source bucket up before uploading to it.
+resource "google_storage_bucket_iam_member" "deployer_reads_build_bucket" {
+  count  = var.github_repo == "" ? 0 : 1
+  bucket = "${var.project_id}_cloudbuild"
+  role   = "roles/storage.legacyBucketReader"
+  member = google_service_account.deployer[0].member
+}
+
+# `gcloud builds submit` lists the project's buckets (by name prefix) to find the source bucket. That one
+# permission, and nothing else, is granted through a custom role.
+resource "google_project_iam_custom_role" "bucket_lister" {
+  role_id     = "amlBucketLister"
+  title       = "List storage buckets"
+  permissions = ["storage.buckets.list"]
+}
+
+resource "google_project_iam_member" "deployer_lists_buckets" {
+  count   = var.github_repo == "" ? 0 : 1
+  project = var.project_id
+  role    = google_project_iam_custom_role.bucket_lister.id
+  member  = google_service_account.deployer[0].member
+}

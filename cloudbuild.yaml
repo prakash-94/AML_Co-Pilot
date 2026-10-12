@@ -16,6 +16,8 @@ steps:
     args: ["build", "-t", "${_IMAGE}", "--build-arg", "GIT_SHA=${_GIT_SHA}", "."]
 images:
   - "${_IMAGE}"
+serviceAccount: projects/${PROJECT_ID}/serviceAccounts/aml-builder@${PROJECT_ID}.iam.gserviceaccount.com
 options:
   machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
 timeout: 1800s
