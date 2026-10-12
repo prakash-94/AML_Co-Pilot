@@ -54,14 +54,12 @@ jobs:
           gcloud builds submit --config cloudbuild.yaml --project "$PROJECT" \
             --substitutions=_IMAGE="$IMAGE",_GIT_SHA="${{ github.sha }}" .
 
+      # The commit id is baked into the image (Dockerfile ARG GIT_SHA -> ENV BUILD_SHA), so /status shows it.
       - name: Roll out the worker, then the API, then the evaluation job
         run: |
-          gcloud run services update aml-worker --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
-            --update-env-vars BUILD_SHA=${{ github.sha }}
-          gcloud run services update aml-api --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
-            --update-env-vars BUILD_SHA=${{ github.sha }}
-          gcloud run jobs update aml-eval --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
-            --update-env-vars BUILD_SHA=${{ github.sha }}
+          gcloud run services update aml-worker --region "$REGION" --project "$PROJECT" --image "$IMAGE"
+          gcloud run services update aml-api --region "$REGION" --project "$PROJECT" --image "$IMAGE"
+          gcloud run jobs update aml-eval --region "$REGION" --project "$PROJECT" --image "$IMAGE"
 
       - name: Smoke test - the live API reports the commit we just deployed
         run: |
