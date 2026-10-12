@@ -48,12 +48,19 @@ resource "google_project_iam_member" "deployer_roles" {
     "roles/run.developer",
     "roles/artifactregistry.writer",
     "roles/serviceusage.serviceUsageConsumer",
-    "roles/storage.objectAdmin", # uploads the build source to the Cloud Build bucket
     "roles/logging.viewer",
   ])
   project = var.project_id
   role    = each.value
   member  = google_service_account.deployer[0].member
+}
+
+# Uploading build sources: object access on the Cloud Build bucket only (not the state or audit buckets).
+resource "google_storage_bucket_iam_member" "deployer_build_bucket" {
+  count  = var.github_repo == "" ? 0 : 1
+  bucket = "${var.project_id}_cloudbuild"
+  role   = "roles/storage.objectAdmin"
+  member = google_service_account.deployer[0].member
 }
 
 # Cloud Run only lets a caller deploy a service if the caller may act as that service's runtime account.
