@@ -58,6 +58,11 @@ def test_the_answer_gets_room_for_gemini_thinking_tokens(fake_chat_vertex):
     assert fake_chat_vertex[1]["max_output_tokens"] == GEMINI_DEFAULT_MAX_TOKENS + GEMINI_THINKING_HEADROOM
 
 
+def test_every_gemini_call_has_a_deadline_and_a_retry_limit(fake_chat_vertex):
+    make_chat_model(gemini_settings())
+    assert fake_chat_vertex[0]["timeout"] == 300 and fake_chat_vertex[0]["max_retries"] == 2
+
+
 def test_one_agent_can_use_a_stronger_model(fake_chat_vertex):
     make_chat_model(gemini_settings(), model="gemini-3.1-pro-preview")
     assert fake_chat_vertex[0]["model_name"] == "gemini-3.1-pro-preview"

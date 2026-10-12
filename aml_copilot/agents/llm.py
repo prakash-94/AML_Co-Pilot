@@ -18,6 +18,9 @@ PROVIDERS = ("gemini", "anthropic", "vertex")
 # what the agent asks for - otherwise a long answer is cut off mid-sentence.
 GEMINI_THINKING_HEADROOM = 8192
 GEMINI_DEFAULT_MAX_TOKENS = 4096
+# Every call gets a deadline: a request that hangs must fail (and be retried) instead of holding a job for an hour.
+GEMINI_TIMEOUT_SECONDS = 300
+GEMINI_MAX_RETRIES = 2
 
 # The names used in settings (ANTHROPIC_MODEL, TYPOLOGY_MODEL, ...) -> the id Vertex AI uses.
 # Current-generation models use the plain name; models with a dated snapshot use "name@date".
@@ -66,6 +69,8 @@ def _make_gemini_model(settings: Settings, model_name: str, max_tokens: int | No
         "project": settings.gcp_project,
         "location": settings.vertex_location,
         "max_output_tokens": (max_tokens or GEMINI_DEFAULT_MAX_TOKENS) + GEMINI_THINKING_HEADROOM,
+        "timeout": GEMINI_TIMEOUT_SECONDS,
+        "max_retries": GEMINI_MAX_RETRIES,
     }
     credentials = google_credentials(settings)
     if credentials is not None:
