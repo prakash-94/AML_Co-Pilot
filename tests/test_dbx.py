@@ -1,5 +1,6 @@
 """The Databricks entry points: investigate, review, secrets and the job mains - all on fakes."""
 
+import os
 from datetime import UTC, datetime
 
 import pytest
@@ -24,6 +25,12 @@ from tests.test_service_delta import FakeDelta
 
 NOW = datetime(2026, 10, 12, 9, 0, tzinfo=UTC)
 ACCOUNT = "ACC-H-00000"
+
+
+@pytest.fixture(autouse=True)
+def private_environment(monkeypatch):
+    """The job mains copy secrets and settings into os.environ; give each test its own copy so nothing leaks."""
+    monkeypatch.setattr(os, "environ", os.environ.copy())
 
 
 def finished_state(account_id=ACCOUNT, status="draft_ready"):
