@@ -52,5 +52,5 @@ all cells. The notebook records you (your Databricks login) as the reviewer. `sh
 
 ## CI/CD
 `.github/workflows/deploy.yml` (manual, approval-gated) validates, deploys the bundle and can run a smoke investigation.
-It needs the secrets `DATABRICKS_HOST`, `DATABRICKS_TOKEN` and the variables `DATABRICKS_WAREHOUSE_HTTP_PATH`,
+It needs the secrets `DATABRICKS_HOST`, `DATABRICKS_TOKEN` and the variables `DATABRICKS_SERVER_HOSTNAME` (bare host), `DATABRICKS_WAREHOUSE_HTTP_PATH`,
 `DATABRICKS_CLIENT_ID`, `SF_USERNAME`.

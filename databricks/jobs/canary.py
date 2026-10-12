@@ -4,4 +4,6 @@ import sys
 
 from aml_copilot.dbx.jobs import canary_main
 
-sys.exit(canary_main(sys.argv[1:]))
+code = canary_main(sys.argv[1:])
+if code:  # a clean sys.exit(0) is reported as a failure by Databricks, so only exit on a real error
+    sys.exit(code)

@@ -48,6 +48,7 @@ def main(argv: list[str]) -> int:
         "PATH": str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", ""),  # `python -m build` finds this Python
         "DATABRICKS_HOST": f"https://{host}",
         "DATABRICKS_TOKEN": token,
+        "BUNDLE_VAR_server_hostname": host,
         "BUNDLE_VAR_warehouse_http_path": values.get("DATABRICKS_HTTP_PATH") or "",
         "BUNDLE_VAR_sf_username": values.get("SF_USERNAME") or "",
         "BUNDLE_VAR_databricks_client_id": values.get("DATABRICKS_CLIENT_ID") or DEFAULT_CLIENT_ID,

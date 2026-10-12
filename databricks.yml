@@ -10,6 +10,8 @@ bundle:
   name: aml_copilot
 
 variables:
+  server_hostname:
+    description: Workspace host name without https:// (the SQL connector wants the bare host)
   warehouse_http_path:
     description: HTTP path of the SQL warehouse that serves the transactions view
   databricks_client_id:
@@ -94,7 +96,7 @@ resources:
               - "--set"
               - "FAITHFULNESS_MODEL=${var.judge_model}"
               - "--set"
-              - "DATABRICKS_SERVER_HOSTNAME=${workspace.host}"
+              - "DATABRICKS_SERVER_HOSTNAME=${var.server_hostname}"
               - "--set"
               - "DATABRICKS_HTTP_PATH=${var.warehouse_http_path}"
               - "--set"
@@ -145,7 +147,7 @@ resources:
               - "--set"
               - "FAITHFULNESS_MODEL=${var.judge_model}"
               - "--set"
-              - "DATABRICKS_SERVER_HOSTNAME=${workspace.host}"
+              - "DATABRICKS_SERVER_HOSTNAME=${var.server_hostname}"
               - "--set"
               - "DATABRICKS_HTTP_PATH=${var.warehouse_http_path}"
               - "--set"
