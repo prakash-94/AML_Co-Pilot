@@ -1,0 +1,9 @@
+# Extend the default rules. The one exception: a Firebase *web* API key is public by design (it only names
+# the project to the browser; sign-in security is enforced on the server and the key is restricted to this
+# site's address and the sign-in APIs in Google Cloud).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Firebase web config"
+paths = ['''web/config\.js''']
