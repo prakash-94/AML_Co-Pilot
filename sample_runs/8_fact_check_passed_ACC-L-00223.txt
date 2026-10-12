@@ -1,0 +1,39 @@
+Investigation of ACC-L-00223: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative -> faithfulness
+Risk score: 50/100 (medium)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+Faithfulness check: PASSED (14 of 14 sentences supported by the evidence)
+
+SAR NARRATIVE DRAFT - ACC-L-00223 (pending human review)
+
+Introduction
+  Account ACC-L-00223 is being referred for review following a rule-engine flagged chain of wire transfers through related accounts that matches a documented layering typology. [TXN095711, TXN095712, TXN095713]
+
+Body
+  The account holder, Priya Al-Farsi, is listed as a retail manager with a High risk rating and is not a PEP; KYC was last reviewed on 2025-11-02.
+  On 2026-08-12 at 16:36:34, a wire transfer of $57,969.64 was sent from ACC-L-00223 to ACC-LC-00223-0 within the US (branch BR005). [TXN095711]
+  On 2026-08-13 at 07:36:34, a wire transfer of $51,893.61 was sent from ACC-LC-00223-0 to ACC-LC-00223-1 within the US (branch BR005). [TXN095712]
+  On 2026-08-13 at 22:36:34, a wire transfer of $48,385.14 was sent from ACC-LC-00223-1 to ACC-LC-00223-2 to the UAE (branch BR005). [TXN095713]
+  The complete transfer chain spans 1 day and 6 hours, with amounts decreasing at each hop. [TXN095711, TXN095712, TXN095713]
+  The rule engine assigned a score of 50/100 (medium), citing a 3-hop transfer chain completed in 1 day 6:00:00 with amounts shrinking at each hop and a cross-border movement from the US to the UAE. [TXN095711, TXN095712, TXN095713]
+  The activity is consistent with the pattern described for Rapid Wire Transfers Through Multiple Accounts (Layering), matched with high confidence, which was independently flagged by the rule engine. [TXN095711, TXN095712, TXN095713]
+  The matched typology notes supported red flags including a chain of transfers between related accounts completed in a short span, amounts that shrink slightly at each hop, and a chain that crosses jurisdictions with no clear business rationale stated. [TXN095711, TXN095712, TXN095713]
+  The red flag concerning geographically distant deposit and withdrawal locations with minimal time between them could not be assessed from the data available.
+  The account has 9 prior cases, of which two resulted in SARs filed, four were closed as false positives or with insufficient evidence, one was closed as a false positive, and two remain open. [CASE-L-006144, CASE-L-001704, CASE-L-003184, CASE-L-004664, CASE-L-010584, CASE-L-009104, CASE-L-012064, CASE-L-007624, CASE-L-000224]
+
+Conclusion
+  The evidence shows a chain of three wire transfers between related accounts, completed in a short time span with amounts decreasing at each hop and a final transfer crossing from the US to the UAE, which is consistent with the pattern described for rapid wire transfers through multiple accounts (layering). [TXN095711, TXN095712, TXN095713]
+  Whether the deposit and withdrawal locations were geographically distant with minimal time between them could not be assessed from the data available.
+  The decision on whether to file a report based on this activity rests with the investigator.
+
+Questions for the investigator to verify
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?

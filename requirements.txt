@@ -1,0 +1,20 @@
+# AML Investigation Copilot - full runtime dependencies (what the container and your laptop use)
+# Target interpreter: Python 3.11 (3.14 is too new for torch / sentence-transformers wheels)
+#   py -3.11 -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt
+#
+# On Linux (the container) install CPU-only torch FIRST, or pip pulls several GB of CUDA wheels:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+-r requirements-core.txt
+
+# --- Embedding model for RAG (local, no API cost); pulls in torch + transformers ---
+sentence-transformers>=6.1,<7
+
+# --- Claude on Google Cloud Vertex AI (LLM_PROVIDER=vertex). About 220 MB; imported lazily, so
+#     CI and laptops using the Anthropic API do not need it. ---
+langchain-google-vertexai>=3.2,<4
+anthropic[vertex]>=1.7,<2
+
+# --- Google Cloud clients used by the deployed service (aml_copilot/service/gcp.py); imported lazily ---
+google-cloud-firestore>=2.19,<3
+google-cloud-storage>=2.18,<4
+google-cloud-tasks>=2.17,<3

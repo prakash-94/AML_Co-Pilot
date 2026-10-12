@@ -1,0 +1,40 @@
+Investigation of ACC-S-00000: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 50/100 (medium)
+Typology match: Structuring (Smurfing) - medium confidence (the rule engine agrees)
+Sources unavailable: none
+
+SAR NARRATIVE DRAFT - ACC-S-00000 (pending human review)
+
+Introduction
+  This account is being referred for review because a deterministic rule engine flagged a series of near-threshold cash deposits scoring 50/100 (medium), and the pattern has been matched to the documented structuring (smurfing) typology. [TXN081765, TXN081766, TXN081767]
+
+Body
+  The account holder, Tom Garcia, is listed as a small business owner with a High risk rating. [ACC-S-00000]
+  Garcia is not flagged as a politically exposed person. [ACC-S-00000]
+  The KYC profile was last reviewed on 2026-01-15. [ACC-S-00000]
+  The account contains 4 transactions totaling $24,364.21 over a 52-day period from 2026-06-22 to 2026-08-13. [TXN081765, TXN081766, TXN081767, TXN081768]
+  A cash deposit of $7,693.28 occurred on 2026-06-22. [TXN081765]
+  A cash deposit of $8,139.07 occurred on 2026-07-12. [TXN081766]
+  A card transaction of $871.22 occurred on 2026-07-17. [TXN081768]
+  A cash deposit of $7,660.64 occurred on 2026-08-13. [TXN081767]
+  All four transactions occurred at US branches. [TXN081765, TXN081766, TXN081767, TXN081768]
+  The rule engine flagged a structuring signal consisting of 3 cash deposits between $7,000 and $10,000 within a 90-day window, across 3 branches, producing a score of 50/100 (medium). [TXN081765, TXN081766, TXN081767]
+  This activity is consistent with the pattern described for structuring (smurfing), which involves multiple cash deposits each kept below the $10,000 CTR threshold and spread across different branches or days. [TXN081765, TXN081766, TXN081767]
+  Network expansion found no related accounts or related-account transactions connected to this account. [ACC-S-00000]
+  The account has 18 prior cases on record, including two that resulted in SAR filings, three that were escalated and remain under review, and one that remains open with no disposition. [CASE-S-000001, CASE-S-019981, CASE-S-039961, CASE-S-028861, CASE-S-026641, CASE-S-004441]
+
+Conclusion
+  The evidence shows a pattern of three cash deposits each below the $10,000 reporting threshold, spread across a 52-day period and across 3 branches, which is consistent with the pattern described for structuring (smurfing). [TXN081765, TXN081766, TXN081767]
+  Whether the account holder's stated business activity plausibly generates this volume of cash, and whether the deposits were split from a single larger sum, could not be assessed from the data available.
+  The final determination as to whether this activity warrants a filing rests with the investigator.
+
+Questions for the investigator to verify
+  - What is the customer's expected source of cash, and does their stated occupation or business plausibly produce this volume?
+  - Are the near-threshold deposits spread across branches or days, and is there a business reason for that spread?
+  - Were the deposits all made by the account holder, or by other people - and are those people linked to each other or to the account?
+  - Where did the money go after the deposits: withdrawn, transferred out, or used to buy monetary instruments?
+  - Has the customer documented a legitimate explanation, and does it fit the actual dates and amounts?
+  - Do any prior alerts or cases on this account show the same pattern?

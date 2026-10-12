@@ -1,0 +1,38 @@
+# Only the application code and the typology documents belong in the image.
+# Everything below is excluded so that no secret, test data or build junk is baked in.
+
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+service-account*.json
+
+# python / local state
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.chroma
+*.pkl
+
+# VCS and CI
+.git
+.github
+
+# not needed at runtime
+tests
+evaluation_results
+sample_runs
+docs
+infra
+web
+scripts
+*.csv
+*.docx
+seed_high_risk_accounts.py
+generate_salesforce_customers.py
+requirements-dev.txt

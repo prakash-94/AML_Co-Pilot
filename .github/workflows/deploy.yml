@@ -1,0 +1,71 @@
+name: deploy
+
+# Manual trigger. One-time setup:
+#   1. terraform apply -var github_repo=<owner>/<repo> -var deploy_services=true   (creates the keyless login)
+#   2. Repository Settings > Secrets and variables > Actions > Variables:
+#        GCP_PROJECT_ID, GCP_WORKLOAD_IDENTITY_PROVIDER, GCP_DEPLOY_SERVICE_ACCOUNT
+#      (the last two are printed by terraform as github_workload_identity_provider / github_deployer_service_account)
+#   3. Settings > Environments > "production" > add yourself as a required reviewer (that is the approval gate).
+# No key files anywhere: GitHub proves its identity to Google through Workload Identity Federation, and the
+# deployer account can build and roll out images but cannot change infrastructure.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency: deploy
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - run: pip install -r requirements-ci.txt
+      - run: ruff check .
+      - run: pytest -q
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production # pauses here until a required reviewer approves
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: us-central1
+      IMAGE: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/aml/aml-copilot:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build the image in Cloud Build (tagged with the commit)
+        run: |
+          gcloud builds submit --config cloudbuild.yaml --project "$PROJECT" \
+            --substitutions=_IMAGE="$IMAGE",_GIT_SHA="${{ github.sha }}" .
+
+      - name: Roll out the worker, then the API, then the evaluation job
+        run: |
+          gcloud run services update aml-worker --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
+            --update-env-vars BUILD_SHA=${{ github.sha }}
+          gcloud run services update aml-api --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
+            --update-env-vars BUILD_SHA=${{ github.sha }}
+          gcloud run jobs update aml-eval --region "$REGION" --project "$PROJECT" --image "$IMAGE" \
+            --update-env-vars BUILD_SHA=${{ github.sha }}
+
+      - name: Smoke test - the live API reports the commit we just deployed
+        run: |
+          URL=$(gcloud run services describe aml-api --region "$REGION" --project "$PROJECT" --format='value(status.url)')
+          curl --fail --silent --show-error "$URL/status" | tee status.json
+          grep -q "${{ github.sha }}" status.json
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/investigations")" = "401"

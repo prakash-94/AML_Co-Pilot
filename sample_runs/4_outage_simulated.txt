@@ -1,0 +1,10 @@
+Investigation of ACC-L-00000: INCOMPLETE - EVIDENCE MISSING
+  No narrative was drafted, but databricks could not be queried, so this is NOT evidence that there is nothing to report. Re-run once the source is available.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 0/100 (low)
+Typology match: none
+Sources unavailable: databricks
+
+Other warnings
+  - [ingestion] Network expansion skipped: databricks unavailable

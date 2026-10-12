@@ -1,0 +1,52 @@
+name: CI
+
+# Runs on every pull request and every push to main. It needs no cloud credentials: every test uses
+# fakes for the databases, the vector model and the LLM, so a stranger's pull request is safe to run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-core.txt
+            requirements-ci.txt
+
+      # requirements-ci.txt leaves out torch / sentence-transformers (hundreds of MB the tests never use).
+      - name: Install dependencies
+        run: pip install -r requirements-ci.txt
+
+      - name: Lint
+        run: ruff check aml_copilot tests seed_high_risk_accounts.py
+
+      - name: Tests
+        run: pytest -q
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # scan the whole history, not just the latest commit
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

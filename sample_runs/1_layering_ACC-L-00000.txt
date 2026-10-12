@@ -1,0 +1,42 @@
+Investigation of ACC-L-00000: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 50/100 (medium)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+
+SAR NARRATIVE DRAFT - ACC-L-00000 (pending human review)
+
+Introduction
+  This account is referred for review following a rule-engine alert identifying a multi-hop wire transfer chain across related accounts that crosses international jurisdictions in a short time span.
+  The pattern observed is consistent with the documented typology for Rapid Wire Transfers Through Multiple Accounts (Layering).
+
+Body
+  The account holder, Emma Wang, is listed as a Teacher and carries a High risk rating.
+  Emma Wang is flagged as a Politically Exposed Person (PEP).
+  KYC information for this account was last reviewed on 2025-11-02.
+  On 2026-08-01 at 21:36:34, a wire transfer of $44,587.98 was sent from ACC-L-00000 to ACC-LC-00000-0 in the US via branch BR003. [TXN095042]
+  Network expansion identified three related accounts linked to ACC-L-00000: ACC-LC-00000-0 (hop 1), ACC-LC-00000-1 (hop 2), and ACC-LC-00000-2 (hop 3).
+  On 2026-08-02 at 01:36:34, a wire transfer of $40,010.80 moved from ACC-LC-00000-0 to ACC-LC-00000-1 in the Cayman Islands via branch BR004. [TXN095043]
+  On 2026-08-02 at 14:36:34, a wire transfer of $35,894.25 moved from ACC-LC-00000-1 to ACC-LC-00000-2 in the Cayman Islands via branch BR005. [TXN095044]
+  The complete transfer chain spans 17 hours and crosses from the US to the Cayman Islands, with the transfer amount decreasing at each hop from $44,587.98 to $40,010.80 to $35,894.25. [TXN095042, TXN095043, TXN095044]
+  The rule engine scored this activity 50/100 (medium) based on a layering signal describing the 3-hop transfer chain completed in 17:00:00, with amounts shrinking at each hop and a border crossing from US to KY.
+  The matched typology, Rapid Wire Transfers Through Multiple Accounts (Layering), was assigned high confidence, and the rule engine independently flagged this same pattern.
+  The chain of transfers between related accounts completed within a short span, the shrinking transfer amounts at each hop, and the jurisdictional crossing are each red flags supported by the evidence under this typology. [TXN095042, TXN095043, TXN095044]
+  The red flag concerning geographically distant deposit and withdrawal locations with minimal time between them could not be assessed from the data available.
+  The account has 9 prior cases, including one, CASE-L-010361, that resulted in a prior SAR filing. [CASE-L-010361]
+
+Conclusion
+  The evidence shows a three-hop wire transfer chain originating from ACC-L-00000 that moves through two related accounts, crosses from the US to the Cayman Islands, and completes within 17 hours with amounts decreasing at each step, a pattern consistent with the documented typology for rapid wire transfers through multiple accounts. [TXN095042, TXN095043, TXN095044]
+  One red flag related to geographic distance between deposit and withdrawal locations could not be assessed from the data available.
+  The decision on whether this activity warrants further escalation or filing rests with the investigator.
+
+Questions for the investigator to verify
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?

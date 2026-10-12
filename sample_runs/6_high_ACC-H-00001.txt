@@ -1,0 +1,53 @@
+Investigation of ACC-H-00001: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 100/100 (high)
+Typology match: Structuring (Smurfing) - high confidence (the rule engine agrees)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+
+SAR NARRATIVE DRAFT - ACC-H-00001 (pending human review)
+
+Introduction
+  This account is being referred for review because a deterministic rule engine assigned it a score of 100 out of 100 (high), based on a pattern of near-threshold cash deposits and a rapid, multi-hop, cross-border wire transfer chain.
+  The identified activity matches two documented typologies: structuring (smurfing) and rapid wire transfers through multiple accounts (layering).
+
+Body
+  The account holder, Fatima Al-Farsi, is listed as a Consultant.
+  The account carries a High risk rating.
+  The KYC profile was last reviewed on 2025-11-14.
+  The account holder is not flagged as a politically exposed person.
+  The account shows 5 transactions totaling $57,668.75 between 2026-06-18 and 2026-07-28, comprising 3 cash deposits, 1 card transaction, and 1 wire transfer, all domestic (US). [TXN099489, TXN099490, TXN099491, TXN099492, TXN099493]
+  On 2026-06-18, a cash deposit of $9,680.00 was made. [TXN099489]
+  On 2026-07-03, a cash deposit of $9,540.35 was made. [TXN099490]
+  On 2026-07-10, a card transaction of $112.40 occurred. [TXN099492]
+  On 2026-07-21, a cash deposit of $9,725.60 was made. [TXN099491]
+  On 2026-07-28, a wire transfer of $28,610.40, the largest transaction in the account, was sent. [TXN099493]
+  Network expansion identified three related accounts, ACC-HC-00001-0 (hop 1), ACC-HC-00001-1 (hop 2), and ACC-HC-00001-2 (hop 3), which together show 2 wire transfer transactions totaling $48,856.05. [TXN099494, TXN099495]
+  On 2026-07-28 at 17:05:00, a wire transfer of $25,740.15 moved from ACC-HC-00001-0 to ACC-HC-00001-1 in the Cayman Islands. [TXN099494]
+  On 2026-07-29 at 04:05:00, a wire transfer of $23,115.90 moved from ACC-HC-00001-1 to ACC-HC-00001-2 in Panama. [TXN099495]
+  The transfer chain spans from the US to the Cayman Islands to Panama over approximately 14 hours, with amounts shrinking at each hop. [TXN099493, TXN099494, TXN099495]
+  The rule engine assigned the account a score of 100/100 (high), citing a structuring signal of 3 cash deposits between $7,000 and $10,000 within a 90-day window across 3 branches, and a layering signal of a 3-hop transfer chain completed in 14:00:00 with amounts shrinking at each hop and crossing borders (US -> KY -> PA). [TXN099489, TXN099490, TXN099491, TXN099493, TXN099494, TXN099495]
+  The three cash deposits and the cross-border transfer chain were matched to the documented typologies for structuring (smurfing) and rapid wire transfers through multiple accounts (layering), each with high confidence. [TXN099489, TXN099490, TXN099491, TXN099493, TXN099494, TXN099495]
+  Three prior cases are associated with this account: one closed as No Action - False Positive, one closed with a SAR filed, and one that remains open with no disposition yet assigned. [CASE-H-000004, CASE-H-000005, CASE-H-000006]
+
+Conclusion
+  The evidence shows a pattern of three cash deposits each below $10,000 and a three-hop wire transfer chain crossing international jurisdictions with shrinking amounts, consistent with the documented patterns for structuring and rapid wire transfers through multiple accounts (layering). [TXN099489, TXN099490, TXN099491, TXN099493, TXN099494, TXN099495]
+  Whether the account holder's stated occupation plausibly generates this volume of cash, and whether deposit and withdrawal locations were geographically distant with minimal time between them, could not be assessed from the data available.
+  The decision on whether this activity warrants further action, including any SAR filing, rests with the investigator.
+
+Questions for the investigator to verify
+  - What is the customer's expected source of cash, and does their stated occupation or business plausibly produce this volume?
+  - Are the near-threshold deposits spread across branches or days, and is there a business reason for that spread?
+  - Were the deposits all made by the account holder, or by other people - and are those people linked to each other or to the account?
+  - Where did the money go after the deposits: withdrawn, transferred out, or used to buy monetary instruments?
+  - Has the customer documented a legitimate explanation, and does it fit the actual dates and amounts?
+  - Do any prior alerts or cases on this account show the same pattern?
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?

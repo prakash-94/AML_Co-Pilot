@@ -1,0 +1,5 @@
+-r requirements.txt
+
+pytest>=9.1,<10
+pytest-asyncio>=1.0,<2         # async FastAPI / LangGraph tests
+ruff>=0.16,<1                  # lint + format

@@ -1,0 +1,50 @@
+Investigation of ACC-H-00000: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 100/100 (high)
+Typology match: Structuring (Smurfing) - high confidence (the rule engine agrees)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+
+SAR NARRATIVE DRAFT - ACC-H-00000 (pending human review)
+
+Introduction
+  This account is being referred for review following a rule engine score of 100/100 (high) that flagged a pattern of near-threshold cash deposits and a rapid cross-border wire chain, matched to documented structuring and layering typologies.
+
+Body
+  The account holder, Wei Chen, is listed as a real estate agent with a high risk rating and PEP (Politically Exposed Person) status.
+  The KYC profile was last reviewed on 2025-09-20.
+  Account ACC-H-00000 contains 5 transactions totaling $55,781.65 between 2026-07-02 and 2026-08-03, consisting of 3 cash deposits, 1 card transaction, and 1 wire transfer, all domestic (US). [TXN099486, TXN099482, TXN099484, TXN099483, TXN099485]
+  On 2026-07-02 a cash deposit of $9,420.50 was made. [TXN099482]
+  On 2026-07-14 a cash deposit of $9,180.75 was made. [TXN099483]
+  On 2026-07-19 a card transaction of $64.90 was made. [TXN099485]
+  On 2026-07-26 a cash deposit of $9,310.20 was made. [TXN099484]
+  On 2026-08-03 a wire transfer of $27,805.30 moved from the account. [TXN099486]
+  Network expansion identified three related accounts: ACC-HC-00000-0 (hop 1), ACC-HC-00000-1 (hop 2), and ACC-HC-00000-2 (hop 3), with two transactions in this network totaling $47,400.89. [TXN099486, TXN099487, TXN099488]
+  On 2026-08-03 at 13:12:00, a wire transfer of $24,990.12 moved from ACC-HC-00000-0 to ACC-HC-00000-1 in Panama. [TXN099487]
+  On 2026-08-03 at 22:12:00, a wire transfer of $22,410.77 moved from ACC-HC-00000-1 to ACC-HC-00000-2 in the United Arab Emirates. [TXN099488]
+  The rule engine assigned a score of 100/100 (high), citing a structuring signal of 3 cash deposits between $7,000 and $10,000 within a 90-day window across 3 branches, and a layering signal of a 3-hop transfer chain completed within 13:00:00 with amounts shrinking at each hop and crossing borders from the US to Panama to the United Arab Emirates. [TXN099482, TXN099483, TXN099484, TXN099486, TXN099487, TXN099488]
+  The three cash deposits of $9,420.50, $9,180.75, and $9,310.20, each falling just under the $10,000 reporting threshold and spread across separate dates, are consistent with the documented pattern described for structuring (smurfing). [TXN099482, TXN099483, TXN099484]
+  The wire transfer of $27,805.30 on 2026-08-03, followed within the same day by the $24,990.12 and $22,410.77 wires between related accounts, with amounts shrinking at each hop and the chain crossing from the US to Panama to the United Arab Emirates, is consistent with the documented pattern described for rapid wire transfers through multiple accounts (layering). [TXN099486, TXN099487, TXN099488]
+  Three prior cases are associated with this account: a Structuring Alert opened 2025-03-11 and closed as Escalated - Under Review, an Unusual Wire Pattern alert opened 2025-06-20 and closed with a SAR Filed disposition, and a High-Risk Country Transfer alert opened 2025-09-08 that remains open with no disposition assigned. [CASE-H-000001, CASE-H-000002, CASE-H-000003]
+
+Conclusion
+  The evidence shows a pattern of near-threshold cash deposits followed by a rapid, multi-hop, cross-border wire chain with amounts decreasing at each step, consistent with the documented patterns for structuring and for layering through multiple accounts. [TXN099482, TXN099483, TXN099484, TXN099486, TXN099487, TXN099488]
+  Whether the account holder's stated occupation plausibly generates this volume of cash, and whether structured purchases of monetary instruments occurred in a similar near-threshold pattern, could not be assessed from the data available.
+  The decision on whether this activity warrants further action or filing rests with the investigator.
+
+Questions for the investigator to verify
+  - What is the customer's expected source of cash, and does their stated occupation or business plausibly produce this volume?
+  - Are the near-threshold deposits spread across branches or days, and is there a business reason for that spread?
+  - Were the deposits all made by the account holder, or by other people - and are those people linked to each other or to the account?
+  - Where did the money go after the deposits: withdrawn, transferred out, or used to buy monetary instruments?
+  - Has the customer documented a legitimate explanation, and does it fit the actual dates and amounts?
+  - Do any prior alerts or cases on this account show the same pattern?
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?

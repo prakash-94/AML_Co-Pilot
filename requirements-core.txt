@@ -1,0 +1,42 @@
+# AML Investigation Copilot - everything EXCEPT the embedding model (torch / sentence-transformers).
+# CI and the lightweight API role install this; requirements.txt adds the embedding model on top.
+# Target interpreter: Python 3.11 (3.14 is too new for torch / sentence-transformers wheels)
+# Not needed locally: pyspark / delta-spark (the Delta table is generated inside Databricks).
+
+# --- Agent orchestration ---
+langgraph>=1.2,<2
+langchain>=1.4,<2
+langchain-anthropic>=1.7,<2
+anthropic>=1.7,<2              # direct API (dev, roll-back provider), LLM-as-judge calls
+
+# --- Retrieval / RAG ---
+chromadb>=1.5,<2
+pypdf>=5.0,<6                  # extracts text from typology_docs/*.pdf for chunking
+
+# --- Data source connections ---
+databricks-sql-connector>=4.5,<5
+simple-salesforce>=1.12,<2
+psycopg2-binary>=2.9,<3
+pandas>=3.0,<4
+
+# --- Serving layer ---
+fastapi>=0.141,<1
+uvicorn[standard]>=0.53,<1
+pydantic>=2.13,<3
+pydantic-settings>=2.15,<3
+google-auth>=2.30,<3           # verify Firebase ID tokens and Cloud Tasks OIDC tokens (small, no gRPC)
+requests>=2.32,<3              # google-auth's transport for fetching Google's public signing keys
+
+# --- Evaluation / guardrails ---
+# RAGAS is deliberately excluded: ragas 0.4.3 (latest) fails on import against
+# langchain-community 0.4.2, and older langchain-community releases conflict with langchain 1.x.
+# Faithfulness is evaluated with our own LLM-as-judge (aml_copilot/guardrails) instead.
+
+# --- Shared utilities ---
+python-dotenv>=1.2,<2          # load SF_* / DATABRICKS_* / DB creds from .env in dev
+httpx>=0.28,<1
+tenacity>=9.2,<10              # retries around flaky source queries and LLM calls
+structlog>=26.1,<27            # structured logging for the audit trail
+
+# Google Cloud client libraries (Firestore, Cloud Storage, Cloud Tasks, Vertex AI) are added in the
+# phase that first uses them, so this file only ever lists packages the code actually imports.

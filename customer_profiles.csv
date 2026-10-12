@@ -1,0 +1,101 @@
+Name,Account Id,Occupation,Risk Rating,Is PEP,KYC Last Reviewed
+Tom Garcia,ACC-S-00000,Small business owner,High,false,2026-01-15
+Fatima Al-Farsi,ACC-S-00001,Teacher,Medium,false,2026-01-15
+Tom Kumar,ACC-S-00002,Consultant,High,false,2026-01-15
+James Smith,ACC-S-00003,Consultant,Medium,false,2026-01-15
+Fatima Mensah,ACC-S-00004,Small business owner,Medium,false,2026-01-15
+Priya Brown,ACC-S-00005,Freelance contractor,Medium,false,2026-01-15
+Olga Silva,ACC-S-00006,Retail manager,Medium,false,2026-01-15
+Liu Wang,ACC-S-00007,Teacher,High,false,2026-01-15
+Emma Rodriguez,ACC-S-00008,Teacher,Medium,false,2026-01-15
+Liu Johnson,ACC-S-00009,Consultant,Medium,false,2026-01-15
+Raj Garcia,ACC-S-00010,Accountant,High,false,2026-01-15
+Sofia Rodriguez,ACC-S-00011,Small business owner,High,false,2026-01-15
+Kwame Garcia,ACC-S-00012,Freelance contractor,Medium,false,2026-01-15
+Kwame Rodriguez,ACC-S-00013,Accountant,Medium,false,2026-01-15
+Priya Garcia,ACC-S-00014,Small business owner,Medium,false,2026-01-15
+Liu Rodriguez,ACC-S-00015,Consultant,Medium,false,2026-01-15
+Anna Garcia,ACC-S-00016,Freelance contractor,High,false,2026-01-15
+Olga Brown,ACC-S-00017,Accountant,Medium,false,2026-01-15
+Emma Johnson,ACC-S-00018,Software engineer,High,false,2026-01-15
+Priya Lee,ACC-S-00019,Consultant,Medium,false,2026-01-15
+Kwame Kumar,ACC-S-00020,Software engineer,Medium,false,2026-01-15
+Olga Patel,ACC-S-00021,Retail manager,Medium,false,2026-01-15
+Tom Johnson,ACC-S-00022,Small business owner,Medium,false,2026-01-15
+Anna Smith,ACC-S-00023,Accountant,High,false,2026-01-15
+Carlos Garcia,ACC-S-00024,Software engineer,High,false,2026-01-15
+Fatima Brown,ACC-S-00025,Real estate agent,High,false,2026-01-15
+David Lee,ACC-S-00026,Real estate agent,Medium,false,2026-01-15
+Carlos Chen,ACC-S-00027,Software engineer,High,false,2026-01-15
+Priya Silva,ACC-S-00028,Freelance contractor,High,false,2026-01-15
+Emma Al-Farsi,ACC-S-00029,Teacher,High,false,2026-01-15
+Maria Wang,ACC-S-00030,Small business owner,Medium,false,2026-01-15
+Wei Brown,ACC-S-00031,Teacher,High,false,2026-01-15
+Sofia Garcia,ACC-S-00032,Freelance contractor,High,false,2026-01-15
+Sofia Ivanova,ACC-S-00033,Retail manager,Medium,false,2026-01-15
+Tom Kumar,ACC-S-00034,Consultant,High,false,2026-01-15
+Liu Brown,ACC-S-00035,Accountant,Medium,false,2026-01-15
+Carlos Patel,ACC-S-00036,Teacher,High,false,2026-01-15
+James Kumar,ACC-S-00037,Retail manager,Medium,false,2026-01-15
+Kwame Lee,ACC-S-00038,Consultant,High,false,2026-01-15
+Anna Brown,ACC-S-00039,Software engineer,Medium,false,2026-01-15
+Emma Wang,ACC-L-00000,Teacher,High,true,2025-11-02
+Kwame Wang,ACC-L-00001,Small business owner,High,true,2025-11-02
+Sofia Johnson,ACC-L-00002,Real estate agent,High,true,2025-11-02
+James Garcia,ACC-L-00003,Accountant,High,false,2025-11-02
+David Novak,ACC-L-00004,Retail manager,High,false,2025-11-02
+Fatima Smith,ACC-L-00005,Software engineer,High,false,2025-11-02
+David Silva,ACC-L-00006,Consultant,High,false,2025-11-02
+Maria Kumar,ACC-L-00007,Real estate agent,High,false,2025-11-02
+Anna Garcia,ACC-L-00008,Teacher,High,false,2025-11-02
+Wei Brown,ACC-L-00009,Real estate agent,High,false,2025-11-02
+Kwame Chen,ACC-L-00010,Retail manager,High,false,2025-11-02
+Kwame Novak,ACC-L-00011,Freelance contractor,High,false,2025-11-02
+Fatima Lee,ACC-L-00012,Software engineer,High,false,2025-11-02
+Priya Rodriguez,ACC-L-00013,Freelance contractor,High,false,2025-11-02
+Tom Brown,ACC-L-00014,Accountant,High,false,2025-11-02
+Olga Lee,ACC-L-00015,Real estate agent,High,false,2025-11-02
+Maria Al-Farsi,ACC-L-00016,Software engineer,High,false,2025-11-02
+Maria Johnson,ACC-L-00017,Small business owner,High,false,2025-11-02
+Sofia Mensah,ACC-L-00018,Software engineer,High,false,2025-11-02
+Sofia Al-Farsi,ACC-L-00019,Small business owner,High,false,2025-11-02
+Maria Kumar,ACC-L-00020,Small business owner,High,false,2025-11-02
+Fatima Garcia,ACC-L-00021,Small business owner,High,false,2025-11-02
+Anna Johnson,ACC-L-00022,Consultant,High,false,2025-11-02
+Kwame Al-Farsi,ACC-L-00023,Retail manager,High,false,2025-11-02
+Tom Ivanova,ACC-L-00024,Software engineer,High,false,2025-11-02
+Kwame Chen,ACC-L-00025,Real estate agent,High,false,2025-11-02
+Fatima Wang,ACC-L-00026,Real estate agent,High,false,2025-11-02
+Liu Patel,ACC-L-00027,Software engineer,High,false,2025-11-02
+Maria Garcia,ACC-L-00028,Freelance contractor,High,false,2025-11-02
+Emma Patel,ACC-L-00029,Freelance contractor,High,false,2025-11-02
+Olga Novak,ACC-N-00000,Small business owner,Low,false,2026-03-10
+Tom Brown,ACC-N-00001,Consultant,Low,false,2026-03-10
+James Patel,ACC-N-00002,Accountant,Low,false,2026-03-10
+Liu Novak,ACC-N-00003,Consultant,Low,false,2026-03-10
+Fatima Al-Farsi,ACC-N-00004,Software engineer,Low,false,2026-03-10
+Kwame Ivanova,ACC-N-00005,Teacher,Low,false,2026-03-10
+Raj Chen,ACC-N-00006,Retail manager,Low,false,2026-03-10
+Olga Al-Farsi,ACC-N-00007,Consultant,Low,false,2026-03-10
+Olga Wang,ACC-N-00008,Consultant,Low,false,2026-03-10
+James Brown,ACC-N-00009,Small business owner,Low,false,2026-03-10
+Maria Lee,ACC-N-00010,Software engineer,Low,false,2026-03-10
+Wei Patel,ACC-N-00011,Real estate agent,Low,false,2026-03-10
+Olga Al-Farsi,ACC-N-00012,Freelance contractor,Low,false,2026-03-10
+David Smith,ACC-N-00013,Teacher,Low,false,2026-03-10
+Raj Smith,ACC-N-00014,Freelance contractor,Low,false,2026-03-10
+Carlos Lee,ACC-N-00015,Real estate agent,Low,false,2026-03-10
+Carlos Patel,ACC-N-00016,Real estate agent,Low,false,2026-03-10
+Wei Al-Farsi,ACC-N-00017,Retail manager,Low,false,2026-03-10
+Fatima Smith,ACC-N-00018,Small business owner,Low,false,2026-03-10
+Priya Johnson,ACC-N-00019,Small business owner,Low,false,2026-03-10
+James Silva,ACC-N-00020,Real estate agent,Low,false,2026-03-10
+Kwame Lee,ACC-N-00021,Teacher,Low,false,2026-03-10
+James Mensah,ACC-N-00022,Consultant,Low,false,2026-03-10
+Anna Chen,ACC-N-00023,Consultant,Low,false,2026-03-10
+Sofia Garcia,ACC-N-00024,Software engineer,Low,false,2026-03-10
+Raj Garcia,ACC-N-00025,Software engineer,Low,false,2026-03-10
+Sofia Silva,ACC-N-00026,Small business owner,Low,false,2026-03-10
+Sofia Garcia,ACC-N-00027,Freelance contractor,Low,false,2026-03-10
+Tom Silva,ACC-N-00028,Accountant,Low,false,2026-03-10
+David Rodriguez,ACC-N-00029,Software engineer,Low,false,2026-03-10

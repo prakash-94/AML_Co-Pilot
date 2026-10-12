@@ -1,0 +1,46 @@
+# --- secrets and local config: NEVER commit -------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+service-account*.json
+*-sa-key.json
+
+# --- python ---------------------------------------------------------------------------------
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+
+# --- generated / local state ----------------------------------------------------------------
+.chroma/
+
+# Saved evaluation runs (contain account data)
+evaluation_results/*.pkl
+*.pkl
+
+# --- infrastructure tooling -----------------------------------------------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.auto.tfvars
+crash.log
+.firebase/
+firebase-debug.log
+node_modules/
+
+# --- private documents (kept local; remove this line to publish) ----------------------------
+AML_Investigation_Copilot_Project_Context.docx
+
+# --- OS / editor ----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Terraform plans can contain resolved values
+*.tfplan

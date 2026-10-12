@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AML Investigation Copilot</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1c2430; --muted:#5d6878; --line:#d9dee6; --accent:#1f5fbf;
+          --ok:#1e7a4a; --warn:#a8650b; --bad:#b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161c; --card:#1a2029; --ink:#e7ebf1; --muted:#9aa6b6; --line:#2b3441; --accent:#6aa3ff;
+            --ok:#5fcf93; --warn:#f0b35c; --bad:#ff8a80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 8px 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:0 0 16px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:8px 0 4px; }
+  input, textarea, select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px;
+                            background:var(--bg); color:var(--ink); font:inherit; }
+  button { padding:8px 14px; border:0; border-radius:6px; background:var(--accent); color:#fff; font:inherit; cursor:pointer; }
+  button.secondary { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:end; flex-wrap:wrap; }
+  .row > * { flex: 1 1 160px; }
+  .row > button { flex: 0 0 auto; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; border:1px solid var(--line); }
+  .high { color:var(--bad); } .medium { color:var(--warn); } .low { color:var(--ok); }
+  pre { white-space:pre-wrap; word-wrap:break-word; background:var(--bg); padding:12px; border-radius:6px;
+        border:1px solid var(--line); font-size:13px; }
+  ul { padding-left: 20px; } .muted { color:var(--muted); } .err { color:var(--bad); }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>AML Investigation Copilot</h1>
+  <p class="sub">Drafts are suggestions for a human reviewer. Nothing here files a report with a regulator.</p>
+
+  <section id="signin" class="card">
+    <h2 style="margin-top:0;font-size:16px">Sign in</h2>
+    <label for="email">Email</label><input id="email" type="email" autocomplete="username">
+    <label for="password">Password</label><input id="password" type="password" autocomplete="current-password">
+    <p><button id="signin-btn">Sign in</button> <span id="signin-msg" class="err"></span></p>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="card">
+      <div class="row">
+        <div><label for="account">Account id</label><input id="account" placeholder="ACC-H-00000" autocapitalize="characters"></div>
+        <button id="start-btn">Investigate</button>
+        <button id="signout-btn" class="secondary">Sign out (<span id="who"></span>)</button>
+      </div>
+      <p id="start-msg" class="muted"></p>
+    </div>
+
+    <div id="job" class="card hidden">
+      <p><strong id="job-account"></strong> <span id="job-status" class="pill"></span> <span id="job-tier" class="pill"></span></p>
+      <p id="job-detail" class="muted"></p>
+      <div id="warnings"></div>
+      <h3 style="font-size:15px">Draft narrative</h3>
+      <pre id="narrative"></pre>
+      <h3 style="font-size:15px">Fact check</h3>
+      <div id="faithfulness" class="muted"></div>
+
+      <div id="review" class="hidden">
+        <h3 style="font-size:15px">Your decision</h3>
+        <label for="comment">Comment (required)</label><textarea id="comment" rows="3" maxlength="2000"></textarea>
+        <p class="row">
+          <button id="approve-btn">Approve draft</button>
+          <button id="escalate-btn" class="secondary">Escalate</button>
+          <button id="reject-btn" class="secondary">Reject</button>
+        </p>
+        <p class="muted">Approve means “approved as a draft for manual filing” and needs the supervisor role.</p>
+      </div>
+      <p id="decision-msg"></p>
+
+      <h3 style="font-size:15px">Audit trail</h3>
+      <div id="audit" class="muted"></div>
+    </div>
+  </section>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

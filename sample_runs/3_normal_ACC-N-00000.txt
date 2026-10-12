@@ -1,0 +1,7 @@
+Investigation of ACC-N-00000: NO ACTION NEEDED
+  No typology matched and the rule engine score is below the medium tier, so there is nothing to report.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 0/100 (low)
+Typology match: none
+Sources unavailable: none

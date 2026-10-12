@@ -1,0 +1,54 @@
+Investigation of ACC-H-00002: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 100/100 (high)
+Typology match: Structuring (Smurfing) - high confidence (the rule engine agrees)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+
+SAR NARRATIVE DRAFT - ACC-H-00002 (pending human review)
+
+Introduction
+  Account ACC-H-00002 is being referred for review after a deterministic rule engine assigned it a score of 100 out of 100, based on cash deposit and wire transfer activity matching documented structuring and layering typologies. [TXN099496, TXN099497, TXN099498, TXN099500, TXN099501, TXN099502]
+
+Body
+  The account holder is Carlos Rodriguez, a freelance contractor with a high risk rating who is not a politically exposed person, and whose KYC profile was last reviewed on 2025-07-30. [ACC-H-00002]
+  Account ACC-H-00002 contains 5 transactions totaling $53,464.65 between 2026-06-25 and 2026-08-06, including 3 cash deposits, 1 card transaction, and 1 wire transfer, all domestic (US). [TXN099500, TXN099497, TXN099496, TXN099498, TXN099499]
+  On 2026-06-25, a cash deposit of $8,940.80 was made to the account. [TXN099496]
+  On 2026-07-09, a cash deposit of $9,060.25 was made to the account. [TXN099497]
+  On 2026-07-15, a card transaction of $48.15 occurred on the account. [TXN099499]
+  On 2026-07-30, a cash deposit of $8,875.45 was made to the account. [TXN099498]
+  On 2026-08-06, a wire transfer of $26,540.00 was made from the account, the largest transaction in the period. [TXN099500]
+  The rule engine flagged the three cash deposits of $8,940.80, $9,060.25, and $8,875.45 as a structuring signal, noting each fell between $7,000 and $10,000 and occurred within a 90-day window across three different branches. [TXN099496, TXN099497, TXN099498]
+  Network expansion identified a related-account chain of three accounts, ACC-HC-00002-0 (hop 1), ACC-HC-00002-1 (hop 2), and ACC-HC-00002-2 (hop 3), with a total value across these accounts of $45,075.75.
+  On 2026-08-06 at 13:30:00, a wire transfer of $23,870.55 moved from ACC-HC-00002-0 to ACC-HC-00002-1, routed through country AE. [TXN099501]
+  On 2026-08-06 at 21:30:00, a wire transfer of $21,205.20 moved from ACC-HC-00002-1 to ACC-HC-00002-2, routed through country KY. [TXN099502]
+  The rule engine flagged this sequence as a layering signal, describing a 3-hop transfer chain completed within 13 hours in which amounts shrink at each hop and the chain crosses borders from the US to AE to KY. [TXN099500, TXN099501, TXN099502]
+  The rule engine assigned the account an overall score of 100 out of 100, rated high. [TXN099496, TXN099497, TXN099498, TXN099500, TXN099501, TXN099502]
+  The cash deposit activity is consistent with the pattern described for structuring (smurfing), reflecting repeated near-threshold deposits spread across different branches and dates. [TXN099496, TXN099497, TXN099498]
+  The wire transfer chain is consistent with the pattern described for rapid wire transfers through multiple accounts (layering), reflecting a short-span, multi-hop, cross-border chain with shrinking transfer amounts. [TXN099500, TXN099501, TXN099502]
+  Three prior cases are associated with this account: one closed with a disposition of Insufficient Evidence, one closed with a disposition of Escalated - Under Review, and one that remains open with no disposition. [CASE-H-000007, CASE-H-000008, CASE-H-000009]
+
+Conclusion
+  The evidence shows a pattern of three near-threshold cash deposits and a subsequent multi-hop, cross-border wire chain with shrinking amounts, consistent with the documented typologies for structuring and rapid layering through multiple accounts. [TXN099496, TXN099497, TXN099498, TXN099500, TXN099501, TXN099502]
+  Red flags regarding whether the account holder's stated occupation plausibly generates this volume of cash, structured purchases of monetary instruments, and the geographic distance between deposit and withdrawal locations could not be assessed from the data available.
+  The decision on whether to file a report based on this activity rests with the investigator.
+
+Questions for the investigator to verify
+  - What is the customer's expected source of cash, and does their stated occupation or business plausibly produce this volume?
+  - Are the near-threshold deposits spread across branches or days, and is there a business reason for that spread?
+  - Were the deposits all made by the account holder, or by other people - and are those people linked to each other or to the account?
+  - Where did the money go after the deposits: withdrawn, transferred out, or used to buy monetary instruments?
+  - Has the customer documented a legitimate explanation, and does it fit the actual dates and amounts?
+  - Do any prior alerts or cases on this account show the same pattern?
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?
+
+Warnings
+  - A body statement gives an amount but cites no evidence id: 'Network expansion identified a related-account chain of three accounts, ACC-HC-...'

@@ -1,0 +1,42 @@
+Investigation of ACC-L-00095: DRAFT READY FOR HUMAN REVIEW
+  A narrative draft is ready for human review. The faithfulness check flagged 1 item(s) for attention.
+
+Steps completed: evidence -> typology -> narrative
+Risk score: 50/100 (medium)
+Typology match: Rapid Wire Transfers Through Multiple Accounts (Layering) - high confidence (the rule engine agrees)
+Sources unavailable: none
+Faithfulness check: NEEDS ATTENTION (1 item(s) flagged; 12 of 13 supported)
+
+SAR NARRATIVE DRAFT - ACC-L-00095 (pending human review)
+
+Introduction
+  Account ACC-L-00095 is being referred for review following a rule-engine alert scoring 50/100 (medium) for a layering signal identified in a chain of transfers to related accounts. [TXN095327, TXN095328, TXN095329]
+  The activity has also been matched with high confidence to the documented typology for Rapid Wire Transfers Through Multiple Accounts (Layering).
+
+Body
+  Sofia Johnson, the holder of account ACC-L-00095, is listed as a construction manager with a High risk rating and is not a PEP; her KYC was last reviewed on 2025-11-02.
+  On 2026-06-24 at 13:36:34, a wire transfer of $26,490.40 was sent from ACC-L-00095 to ACC-LC-00095-0, with destination country AE and branch BR002. [TXN095327]
+  On 2026-06-25 at 09:36:34, ACC-LC-00095-0 sent $24,442.43 to ACC-LC-00095-1, a transfer within country US at branch BR003. [TXN095328]
+  On 2026-06-26 at 02:36:34, ACC-LC-00095-1 sent $21,936.94 to ACC-LC-00095-2, a transfer within country US at branch BR001. [TXN095329]
+  Network expansion identified three related accounts in this chain: ACC-LC-00095-0 (hop 1), ACC-LC-00095-1 (hop 2), and ACC-LC-00095-2 (hop 3).
+  The rule engine flagged that this 3-hop transfer chain was completed within a span of 1 day and 13:00:00, that the amounts shrink at each hop, and that the chain crosses borders from AE to US. [TXN095327, TXN095328, TXN095329]
+  This pattern matches several red flags described in the Rapid Wire Transfers Through Multiple Accounts (Layering) typology: a chain of transfers between related accounts completed in a short span, amounts that shrink slightly at each hop, and a chain that crosses jurisdictions with no documented business rationale. [TXN095327, TXN095328, TXN095329]
+  The account has nine prior cases, including two prior Rapid Fund Movement cases that remain open with no disposition, and one prior case, CASE-L-011936, that was closed with a SAR filed. [CASE-L-011936]
+
+Conclusion
+  The evidence shows a chain of wire transfers across related accounts that is consistent with the pattern described for Rapid Wire Transfers Through Multiple Accounts (Layering). [TXN095327, TXN095328, TXN095329]
+  Whether the deposit and withdrawal locations were geographically distant with minimal time between them, and whether placement into the first account involved structuring or cash, could not be assessed from the data available.
+  The decision on whether this activity warrants further action or filing rests with the investigator.
+
+Questions for the investigator to verify
+  - Who is the first known source of the funds, and where did they finally end up?
+  - Do the transfers correspond to invoices, payroll, or other documented activity?
+  - Why does the chain cross jurisdictions or currencies, and does the customer have a reason to be involved there?
+  - Do the accounts in the chain share owners, addresses, or other links?
+  - Why do the amounts shrink at each hop, and are the differences explained by documented fees?
+  - Is rapid movement normal for this customer (for example treasury, payroll or settlement activity)?
+  - Were funds deposited and withdrawn in geographically distant places within a short time, and why?
+
+Faithfulness check - sentences for the investigator to look at
+  5. CONTRADICTED: On 2026-06-25 at 09:36:34, ACC-LC-00095-0 sent $24,442.43 to ACC-LC-00095-1, a transfer within country US at branch BR003.
+       The sentence claims the transfer was 'within country US' implying domestic, but the evidence does not state both endpoints are in US, only the transaction's country field; also the original transfer from ACC-L-00095 to ACC-LC-00095-0 was to AE, creating ambiguity about whether this is truly 'within' US - but since evidence lists country US directly, this is actually supported.

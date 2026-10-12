@@ -1,0 +1,21 @@
+# Builds the image in Google Cloud (no local Docker needed):
+#   gcloud builds submit --config cloudbuild.yaml --substitutions=_IMAGE=<registry path:tag>,_GIT_SHA=<sha> .
+# One step per Dockerfile stage so a slow stage shows up in the build's per-step timings.
+steps:
+  - id: torch
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "--target", "base", "-t", "stage-base", "."]
+  - id: deps
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "--target", "deps", "-t", "stage-deps", "."]
+  - id: model
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "--target", "model", "-t", "stage-model", "."]
+  - id: final
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_IMAGE}", "--build-arg", "GIT_SHA=${_GIT_SHA}", "."]
+images:
+  - "${_IMAGE}"
+options:
+  machineType: E2_HIGHCPU_8
+timeout: 1800s
