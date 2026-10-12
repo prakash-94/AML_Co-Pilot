@@ -8,7 +8,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -q pydantic-settings structlog
+# MAGIC %pip install -q "pydantic==2.9.2" "pydantic-settings==2.6.1" structlog httpx tenacity python-dotenv
 
 # COMMAND ----------
 
@@ -40,3 +40,8 @@ try:
 except Exception as error:  # show the reason in plain words rather than a stack trace
     text = f"NOT DONE: {error}"
 print(text)
+
+# COMMAND ----------
+
+# Shows the same text as the result of a scheduled / API run, so the outcome can be read without opening the notebook.
+dbutils.notebook.exit(text[:4000])
