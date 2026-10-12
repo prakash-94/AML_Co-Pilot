@@ -26,6 +26,8 @@ from aml_copilot.dbx.runtime import DEFAULT_SCHEMA, spark_services
 dbutils.widgets.dropdown("action", "list", list(ACTIONS), "Action")
 dbutils.widgets.text("investigation_id", "", "Investigation id")
 dbutils.widgets.text("comment", "", "Comment (required to decide)")
+# Only for automated runs that read the result back; leave "no" when you run the notebook yourself.
+dbutils.widgets.dropdown("return_result", "no", ["no", "yes"], "Return result to a caller")
 
 # COMMAND ----------
 
@@ -43,5 +45,7 @@ print(text)
 
 # COMMAND ----------
 
-# Shows the same text as the result of a scheduled / API run, so the outcome can be read without opening the notebook.
-dbutils.notebook.exit(text[:4000])
+# An automated run (a job or the API) reads the result from here; in a notebook you open yourself the full report is
+# already printed above, and exiting would cut it off at 4000 characters.
+if dbutils.widgets.get("return_result") == "yes":
+    dbutils.notebook.exit(text[:4000])
