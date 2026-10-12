@@ -47,18 +47,7 @@ class Settings(BaseSettings):
     log_format: str = "console"
     log_level: str = "INFO"
 
-    # --- The deployed service (aml_copilot/service) ---
-    service_role: str = "api"  # "api" serves the browser; "worker" runs investigations
-    service_backend: str = "memory"  # "memory" for local development; "gcp" = Firestore + Cloud Storage + Cloud Tasks
-    auth_mode: str = "dev"  # "dev" (fixed test tokens, refused on Cloud Run) or "firebase"
-    firebase_project_id: str = ""
-    audit_bucket: str = ""  # Cloud Storage bucket holding the audit trail
-    tasks_location: str = "us-central1"
-    tasks_queue: str = "investigations"
-    worker_url: str = ""  # the worker's https address; also the audience of Cloud Tasks' token
-    tasks_invoker_email: str = ""  # the service account Cloud Tasks signs its calls as
-    daily_investigation_limit: int = 30
-    api_prefix: str = ""  # "/api" when served behind Firebase Hosting (which forwards the full path)
+    # Recorded in each draft's provenance (set by the deploy; blank when running locally).
     build_sha: str = ""
 
 

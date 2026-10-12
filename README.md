@@ -75,8 +75,7 @@ Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.
 * **Quality gate.** The weekly canary fails the job if a tier or typology is wrong or fewer than 90% of draft
   sentences are supported.
 
-Deploy and operate: [`docs/databricks.md`](docs/databricks.md). An earlier Google Cloud Run deployment of the same
-service rules is described in [`docs/deploy.md`](docs/deploy.md) and is being retired.
+Deploy and operate: [`docs/databricks.md`](docs/databricks.md).
 
 ## Running it locally
 
@@ -84,12 +83,8 @@ service rules is described in [`docs/deploy.md`](docs/deploy.md) and is being re
 py -3.11 -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt           # copy .env.example to .env and fill it in first
 python -m aml_copilot.agents.investigation ACC-H-00000          # one investigation on the command line
-uvicorn aml_copilot.service.app:app --port 8080                  # optional: the HTTP API with in-memory storage + dev tokens
 pytest -q                                                       # 550 tests, no network or API keys needed
 ```
-
-Dev tokens `dev-investigator` / `dev-supervisor` work only locally; the app refuses dev authentication when it
-detects Cloud Run.
 
 ## Layout
 
@@ -99,10 +94,10 @@ detects Cloud Run.
 | `aml_copilot/agents` | evidence, typology, narrative agents and the LangGraph orchestrator |
 | `aml_copilot/retrieval`, `typology_docs/` | chunking, embeddings, vector store; the typology corpus |
 | `aml_copilot/guardrails`, `evaluation` | faithfulness + consistency checks; the evaluation harness and canary |
-| `aml_copilot/service` | job rules, audit chain, Delta adapters (+ an optional HTTP API and Google Cloud adapters) |
+| `aml_copilot/service` | job rules, audit chain, `process_job`, Delta storage adapters |
 | `aml_copilot/dbx` | the Databricks job entry points, review logic, secret loading |
 | `databricks.yml`, `databricks/` | the bundle: jobs, reporting pipeline (SQL), review notebook |
-| `scripts/` | deploy and secret helpers; `infra/`, `web/`, `Dockerfile` are the retiring Cloud Run deployment |
+| `scripts/` | `dbx_deploy.py` and `put_databricks_secrets.py`, plus data seeding |
 
 ## Known limits
 

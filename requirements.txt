@@ -13,8 +13,3 @@ sentence-transformers>=6.1,<7
 #     CI and laptops using the Anthropic API do not need it. ---
 langchain-google-vertexai>=3.2,<4
 anthropic[vertex]>=1.7,<2
-
-# --- Google Cloud clients used by the deployed service (aml_copilot/service/gcp.py); imported lazily ---
-google-cloud-firestore>=2.19,<3
-google-cloud-storage>=2.18,<4
-google-cloud-tasks>=2.17,<3

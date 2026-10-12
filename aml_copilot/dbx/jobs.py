@@ -66,7 +66,7 @@ def investigate_main(argv: Sequence[str], spark: Any = None, dbutils: Any = None
     requested_by = args.requested_by or sql("SELECT current_user() AS u", {})[0]["u"]
 
     from aml_copilot.retrieval.store import build_index
-    from aml_copilot.service.app import make_provenance, make_run_fn
+    from aml_copilot.service.pipeline import make_provenance, make_run_fn
 
     print(f"vector index built: {build_index()} chunks", flush=True)
     report = investigate(

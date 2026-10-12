@@ -211,7 +211,7 @@ class FakeSpark:
 
 def patch_pipeline(monkeypatch, run=None):
     monkeypatch.setattr("aml_copilot.retrieval.store.build_index", lambda *a, **k: 229)
-    monkeypatch.setattr("aml_copilot.service.app.make_run_fn", lambda settings: run or (lambda a: finished_state(a)))
+    monkeypatch.setattr("aml_copilot.service.pipeline.make_run_fn", lambda settings: run or (lambda a: finished_state(a)))
 
 
 def test_the_investigate_job_runs_end_to_end_on_the_delta_fake(monkeypatch, capsys):
@@ -239,5 +239,13 @@ def test_the_job_refuses_a_hostile_account_id(monkeypatch):
         jobs.investigate_main(["--account-id", "ACC-S-1; DROP TABLE x"], spark=FakeSpark(FakeDelta()), dbutils=FakeDbutils({}))
 
 
-def test_the_settings_object_can_be_built_from_the_job_environment():
-    assert Settings(_env_file=None).service_backend == "memory"
+
+
+def test_provenance_names_the_model_for_each_step():
+    from aml_copilot.service.pipeline import make_provenance
+
+    p = make_provenance(Settings(_env_file=None, anthropic_model="claude-haiku-4-5", narrative_model="claude-sonnet-5",
+                                 llm_provider="vertex", build_sha="abc123"))
+    assert p.models == {"evidence": "claude-haiku-4-5", "typology": "claude-haiku-4-5",
+                        "narrative": "claude-sonnet-5", "faithfulness": "claude-haiku-4-5"}
+    assert p.llm_provider == "vertex" and p.build == {"sha": "abc123"}

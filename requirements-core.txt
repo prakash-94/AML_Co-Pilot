@@ -19,13 +19,9 @@ simple-salesforce>=1.12,<2
 psycopg2-binary>=2.9,<3
 pandas>=3.0,<4
 
-# --- Serving layer ---
-fastapi>=0.141,<1
-uvicorn[standard]>=0.53,<1
+# --- Data models and settings ---
 pydantic>=2.13,<3
 pydantic-settings>=2.15,<3
-google-auth>=2.30,<3           # verify Firebase ID tokens and Cloud Tasks OIDC tokens (small, no gRPC)
-requests>=2.32,<3              # google-auth's transport for fetching Google's public signing keys
 
 # --- Evaluation / guardrails ---
 # RAGAS is deliberately excluded: ragas 0.4.3 (latest) fails on import against
