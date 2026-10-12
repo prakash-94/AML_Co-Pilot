@@ -59,6 +59,15 @@ Open `Workspace > Users > you > .bundle > aml_copilot > prod > files > databrick
 **action** (`list`, `show`, `approve`, `reject`, `escalate`), paste the **investigation id**, write a **comment**, and run
 all cells. The notebook records you (your Databricks login) as the reviewer. `show` also verifies the audit chain.
 
+### Reviewing without the browser
+If the Databricks web page keeps signing you out, review from a terminal instead. It runs the same logic as the notebook
+and records you (the owner of your `DATABRICKS_TOKEN`) as the reviewer:
+```bash
+python scripts/dbx_review.py list
+python scripts/dbx_review.py show <investigation id>
+python scripts/dbx_review.py approve <investigation id> --comment "Reviewed the cited transactions"
+```
+
 ## What each piece does
 | Piece | Where |
 |---|---|
