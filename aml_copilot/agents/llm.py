@@ -1,4 +1,4 @@
-"""Helpers shared by every agent that asks Claude for structured output."""
+"""Helpers shared by every agent that asks a language model for structured output."""
 
 from typing import Any
 
@@ -12,7 +12,12 @@ from aml_copilot.errors import ConfigError, ModelOutputError
 # slightly more variable, but never broken.
 _TEMPERATURE_OK_PREFIXES = ("claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6")
 
-PROVIDERS = ("anthropic", "vertex")
+PROVIDERS = ("gemini", "anthropic", "vertex")
+
+# Gemini spends part of its output budget on hidden "thinking" tokens, so the visible answer needs headroom on top of
+# what the agent asks for - otherwise a long answer is cut off mid-sentence.
+GEMINI_THINKING_HEADROOM = 8192
+GEMINI_DEFAULT_MAX_TOKENS = 4096
 
 # The names used in settings (ANTHROPIC_MODEL, TYPOLOGY_MODEL, ...) -> the id Vertex AI uses.
 # Current-generation models use the plain name; models with a dated snapshot use "name@date".
@@ -33,18 +38,39 @@ def vertex_model_id(name: str, overrides: dict[str, str] | None = None) -> str:
 def make_chat_model(
     settings: Settings, max_tokens: int | None = None, model: str | None = None
 ) -> Any:
-    """Build the Claude chat model, sending temperature=0 only to models that accept it.
+    """Build the chat model for one agent.
 
-    `model` overrides `settings.anthropic_model` for one agent (e.g. a stronger judge).
-    `settings.llm_provider` picks where Claude is called from; every agent comes through here, so
-    this is the only place that knows the difference.
+    `model` overrides `settings.llm_model` for one agent (e.g. a stronger judge). `settings.llm_provider` picks which
+    family answers; every agent comes through here, so this is the only place that knows the difference.
     """
-    model_name = model or settings.anthropic_model
+    model_name = model or settings.llm_model
+    if settings.llm_provider == "gemini":
+        return _make_gemini_model(settings, model_name, max_tokens)
     if settings.llm_provider == "vertex":
         return _make_vertex_model(settings, model_name, max_tokens)
     if settings.llm_provider == "anthropic":
         return _make_anthropic_model(settings, model_name, max_tokens)
     raise ConfigError(f"LLM_PROVIDER must be one of {PROVIDERS}, not {settings.llm_provider!r}")
+
+
+def _make_gemini_model(settings: Settings, model_name: str, max_tokens: int | None) -> Any:
+    """Google Gemini on Vertex AI. Temperature is left at Gemini's default: Google advises against lowering it for the
+    3.x models, and the structured-output schema plus the code-side checks keep the answers in bounds."""
+    require(settings, "gcp_project")
+    from langchain_google_vertexai import ChatVertexAI
+
+    from aml_copilot.agents.gcp_auth import google_credentials
+
+    kwargs: dict[str, Any] = {
+        "model_name": model_name,
+        "project": settings.gcp_project,
+        "location": settings.vertex_location,
+        "max_output_tokens": (max_tokens or GEMINI_DEFAULT_MAX_TOKENS) + GEMINI_THINKING_HEADROOM,
+    }
+    credentials = google_credentials(settings)
+    if credentials is not None:
+        kwargs["credentials"] = credentials
+    return ChatVertexAI(**kwargs)
 
 
 def _make_anthropic_model(settings: Settings, model_name: str, max_tokens: int | None) -> Any:

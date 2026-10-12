@@ -31,7 +31,7 @@ pydantic-settings>=2.15,<3
 # --- Shared utilities ---
 python-dotenv>=1.2,<2          # load SF_* / DATABRICKS_* / DB creds from .env in dev
 httpx>=0.28,<1
-tenacity>=9.2,<10              # retries around flaky source queries and LLM calls
+tenacity>=8.5,<10              # retries around flaky source queries and LLM calls
 structlog>=26.1,<27            # structured logging for the audit trail
 
 # Google Cloud client libraries (Firestore, Cloud Storage, Cloud Tasks, Vertex AI) are added in the

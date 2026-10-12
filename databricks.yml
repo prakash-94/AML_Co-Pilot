@@ -1,7 +1,7 @@
 # Databricks Asset Bundle: everything that runs on Databricks.
 #   databricks bundle validate / deploy        (scripts/dbx_deploy.py does this using your .env)
 #
-#   aml-investigate    job   one investigation per run (parameters: account_id)     <- the application
+#   aml-investigate    job   one investigation per run (Gemini on Vertex AI, keyless login) (parameters: account_id)     <- the application
 #   aml-canary         job   weekly quality check, then refreshes the reports
 #   aml-refresh-reports job  daily refresh of the reporting pipeline
 #   aml-reporting      pipeline  Lakeflow declarative pipeline: materialized views for dashboards
@@ -21,13 +21,21 @@ variables:
   transactions_table:
     default: workspace.aml_copilot.transactions_safe
   evidence_model:
-    default: claude-haiku-4-5
+    description: Model for the evidence summarizer (a fast, inexpensive Gemini Flash)
+    default: gemini-3.5-flash
   judge_model:
-    default: claude-sonnet-5
+    description: Model for the typology judge, narrative writer and fact-checker
+    default: gemini-3.1-pro-preview
+  gcp_project:
+    description: Google Cloud project that serves Gemini on Vertex AI
+  gcp_wif_audience:
+    description: Workload identity provider that trusts this workspace's service principal
+  gcp_service_account:
+    description: Google service account (with the Vertex AI user role) the principal impersonates
   daily_limit:
     default: "30"
   canary_cap_usd:
-    default: "0.6"
+    default: "1.6"
 
 artifacts:
   aml_copilot_wheel:
@@ -42,13 +50,9 @@ sync:
     - docs
     - sample_runs
     - evaluation_results
-    - web
     - scripts
     - "customer_profiles*.csv"
     - "*.docx"
-    - Dockerfile
-    - cloudbuild.yaml
-    - firebase.json
 
 # Every task receives the non-secret settings as --set KEY=VALUE pairs; secrets come from the secret scope `aml-copilot`.
 
@@ -86,9 +90,9 @@ resources:
               - "--daily-limit"
               - ${var.daily_limit}
               - "--set"
-              - "LLM_PROVIDER=anthropic"
+              - "LLM_PROVIDER=gemini"
               - "--set"
-              - "ANTHROPIC_MODEL=${var.evidence_model}"
+              - "LLM_MODEL=${var.evidence_model}"
               - "--set"
               - "TYPOLOGY_MODEL=${var.judge_model}"
               - "--set"
@@ -109,6 +113,14 @@ resources:
               - "AML_TYPOLOGY_DIR=${workspace.file_path}/typology_docs"
               - "--set"
               - "AML_CHROMA_DIR=/tmp/aml_chroma"
+              - "--set"
+              - "GCP_PROJECT=${var.gcp_project}"
+              - "--set"
+              - "GCP_AUTH=databricks"
+              - "--set"
+              - "GCP_WIF_AUDIENCE=${var.gcp_wif_audience}"
+              - "--set"
+              - "GCP_SERVICE_ACCOUNT=${var.gcp_service_account}"
               - "--set"
               - "LOG_FORMAT=json"
 
@@ -137,9 +149,9 @@ resources:
               - "--cap"
               - ${var.canary_cap_usd}
               - "--set"
-              - "LLM_PROVIDER=anthropic"
+              - "LLM_PROVIDER=gemini"
               - "--set"
-              - "ANTHROPIC_MODEL=${var.evidence_model}"
+              - "LLM_MODEL=${var.evidence_model}"
               - "--set"
               - "TYPOLOGY_MODEL=${var.judge_model}"
               - "--set"
@@ -160,6 +172,14 @@ resources:
               - "AML_TYPOLOGY_DIR=${workspace.file_path}/typology_docs"
               - "--set"
               - "AML_CHROMA_DIR=/tmp/aml_chroma"
+              - "--set"
+              - "GCP_PROJECT=${var.gcp_project}"
+              - "--set"
+              - "GCP_AUTH=databricks"
+              - "--set"
+              - "GCP_WIF_AUDIENCE=${var.gcp_wif_audience}"
+              - "--set"
+              - "GCP_SERVICE_ACCOUNT=${var.gcp_service_account}"
               - "--set"
               - "LOG_FORMAT=json"
         - task_key: refresh_reports

@@ -27,9 +27,9 @@ def make_run_fn(settings: Settings) -> Callable[[str], Mapping[str, Any]]:
 
 def make_provenance(settings: Settings) -> Provenance:
     models = {
-        "evidence": settings.anthropic_model,
-        "typology": settings.typology_model or settings.anthropic_model,
-        "narrative": settings.narrative_model or settings.anthropic_model,
-        "faithfulness": settings.faithfulness_model or settings.anthropic_model,
+        "evidence": settings.llm_model,
+        "typology": settings.typology_model or settings.llm_model,
+        "narrative": settings.narrative_model or settings.llm_model,
+        "faithfulness": settings.faithfulness_model or settings.llm_model,
     }
     return Provenance(llm_provider=settings.llm_provider, models=models, build={"sha": settings.build_sha})

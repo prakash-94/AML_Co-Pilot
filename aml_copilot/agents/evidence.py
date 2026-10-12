@@ -15,6 +15,7 @@ Dependencies (`ingest_fn`, `score_fn`, `summarize_fn`) are injected, so the grap
 without live credentials or an Anthropic API key - the same pattern as the ingestion sources.
 """
 
+import re
 from collections.abc import Callable
 
 from langgraph.graph import END, StateGraph
@@ -232,12 +233,30 @@ def build_evidence_graph(ingest_fn: IngestFn, score_fn: ScoreFn, summarize_fn: S
     return graph.compile()
 
 
+_EVIDENCE_ID = re.compile(r"\b(?:TXN[A-Z0-9-]*\d|CASE-[A-Z]-\d+)\b")
+_SECTIONS = ("profile_summary", "transaction_summary", "network_summary", "case_history_summary", "detection_summary")
+
+
+def with_derived_citations(summary: EvidenceSummary) -> EvidenceSummary:
+    """If the model left `citations` empty although its sentences name transaction / case ids, build the citations
+    from the ids found in each section. The downstream agents rely on citations to know which ids are real; the ids are
+    still checked against the rule-engine and evidence there, so this only restores what the model should have filled in."""
+    if summary.citations:
+        return summary
+    derived = {}
+    for section in _SECTIONS:
+        ids = list(dict.fromkeys(_EVIDENCE_ID.findall(getattr(summary, section) or "")))
+        if ids:
+            derived[f"{section.removesuffix('_summary').replace('_', ' ')} (ids named in the summary)"] = ids
+    return summary.model_copy(update={"citations": derived}) if derived else summary
+
+
 def make_anthropic_summarizer(settings: Settings) -> SummarizeFn:
-    """The real summarizer: Claude via langchain-anthropic, structured to EvidenceSummary."""
+    """The real summarizer: the configured model (Gemini Flash by default), structured to EvidenceSummary."""
     structured = make_chat_model(settings).with_structured_output(EvidenceSummary)
 
     def summarize(prompt: str) -> EvidenceSummary:
-        return invoke_structured(structured, prompt)
+        return with_derived_citations(invoke_structured(structured, prompt))
 
     return summarize
 

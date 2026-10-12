@@ -11,13 +11,38 @@ CLI, so nothing secret is typed or printed.
    python scripts/put_databricks_secrets.py --dry-run     # shows names and lengths
    python scripts/put_databricks_secrets.py
    ```
-   It stores `ANTHROPIC_API_KEY`, `SF_PASSWORD`, `SF_SECURITY_TOKEN` and `SUPABASE_DB_URL`. The Supabase address is
+   It stores `SF_PASSWORD`, `SF_SECURITY_TOKEN` and `SUPABASE_DB_URL`. There is no model API key (see "Gemini on Vertex AI"). The Supabase address is
    converted to the IPv4 *pooler* (the direct host is IPv6-only and unreachable from Databricks serverless).
    `DATABRICKS_CLIENT_SECRET` (the service principal) is already in the scope.
 3. The service tables (`documents`, `audit_objects`, `reviewers`) are created by the first job run. Add reviewers:
    ```sql
    INSERT INTO workspace.aml_copilot.reviewers VALUES ('you@example.com', 'supervisor');   -- or 'investigator'
    ```
+
+## Gemini on Vertex AI (keyless)
+The models are Google Gemini on Vertex AI: **Gemini 3.1 Pro** (preview) judges typologies, writes the narrative and
+fact-checks it; **Gemini 3.5 Flash** summarizes the evidence. Organisation policy forbids service-account key files,
+and Vertex API keys are not accepted for a normal project, so the jobs log in to Google without a stored secret:
+
+1. The job asks Databricks for an OAuth token for its service principal (`aml-copilot-app`).
+2. Google's Security Token Service swaps it for a Google token, because a workload identity pool trusts this workspace
+   (`https://<host>/oidc`) for exactly that one principal.
+3. The token impersonates the Google service account `aml-gemini`, which holds only the *Vertex AI User* role.
+
+One-time Google setup (already done for this project; `<NUM>` is the project number):
+```bash
+gcloud iam service-accounts create aml-gemini --project <PROJECT>
+gcloud projects add-iam-policy-binding <PROJECT> --member=serviceAccount:aml-gemini@<PROJECT>.iam.gserviceaccount.com --role=roles/aiplatform.user
+gcloud iam workload-identity-pools create databricks --location=global --project <PROJECT>
+gcloud iam workload-identity-pools providers create-oidc databricks --workload-identity-pool=databricks --location=global --project <PROJECT>   --issuer-uri="https://<HOST>/oidc" --allowed-audiences=<WORKSPACE_ID> --attribute-mapping="google.subject=assertion.sub"   --attribute-condition="assertion.sub == '<SERVICE_PRINCIPAL_APPLICATION_ID>'"
+gcloud iam service-accounts add-iam-policy-binding aml-gemini@<PROJECT>.iam.gserviceaccount.com --role=roles/iam.workloadIdentityUser   --member="principal://iam.googleapis.com/projects/<NUM>/locations/global/workloadIdentityPools/databricks/subject/<SERVICE_PRINCIPAL_APPLICATION_ID>"
+```
+The three non-secret values the bundle needs (`GCP_PROJECT`, `GCP_WIF_AUDIENCE`, `GCP_SERVICE_ACCOUNT`) live in `.env`
+for local deploys and in GitHub repository variables for CI. To run the pipeline from a laptop, set `GCP_AUTH=token`
+and `GCP_ACCESS_TOKEN=$(gcloud auth print-access-token)`.
+
+Gemini bills its hidden "thinking" tokens as output, so the cost meter counts them. Gemini 3.1 Pro is a *preview*
+model: Google can change or retire it with notice.
 
 ## Deploy and run
 ```bash
@@ -53,4 +78,4 @@ all cells. The notebook records you (your Databricks login) as the reviewer. `sh
 ## CI/CD
 `.github/workflows/deploy.yml` (manual, approval-gated) validates, deploys the bundle and can run a smoke investigation.
 It needs the secrets `DATABRICKS_HOST`, `DATABRICKS_TOKEN` and the variables `DATABRICKS_SERVER_HOSTNAME` (bare host), `DATABRICKS_WAREHOUSE_HTTP_PATH`,
-`DATABRICKS_CLIENT_ID`, `SF_USERNAME`.
+`DATABRICKS_CLIENT_ID`, `SF_USERNAME`, `GCP_PROJECT`, `GCP_WIF_AUDIENCE`, `GCP_SERVICE_ACCOUNT`.

@@ -198,7 +198,7 @@ def test_compute_stats_aggregates_amounts_types_and_dates():
 
 # --------------------------------------------------------------- investigate()
 def test_investigate_requires_anthropic_key_before_touching_ingest():
-    settings = Settings(_env_file=None)  # no anthropic_api_key, no source credentials either
+    settings = Settings(_env_file=None, llm_provider="anthropic")  # no anthropic_api_key, no source credentials either
     with pytest.raises(ConfigError, match="ANTHROPIC_API_KEY"):
         investigate(ACC, settings=settings)
 
@@ -208,7 +208,7 @@ def test_investigate_accepts_a_configured_key_without_making_a_real_call(monkeyp
     # no network call is made because we never invoke the returned summarizer.
     from aml_copilot.agents.evidence import make_anthropic_summarizer
 
-    settings = Settings(_env_file=None, anthropic_api_key=SecretStr("sk-test"))
+    settings = Settings(_env_file=None, llm_provider="anthropic", anthropic_api_key=SecretStr("sk-test"))
     summarize_fn = make_anthropic_summarizer(settings)
     assert callable(summarize_fn)
 
@@ -229,3 +229,42 @@ def test_prompt_names_the_countries_and_branches_of_the_transactions():
 def test_prompt_omits_country_text_when_rows_have_none():
     prompt = build_evidence_prompt(full_bundle(), NO_SIGNAL)
     assert "countries" not in prompt and "country=" not in prompt
+
+
+# ---------------------------------------------------------------------- citations in the model-facing schema
+def test_the_model_is_shown_citations_as_a_list_of_claim_and_ids():
+    schema = EvidenceSummary.model_json_schema()["properties"]["citations"]
+    assert schema["type"] == "array" and set(schema["items"]["properties"]) == {"claim", "ids"}
+    assert "additionalProperties" not in str(schema)  # Gemini's schema language cannot express a free-form map
+
+
+def test_a_list_of_claims_is_stored_as_a_claim_to_ids_map_and_a_map_still_works():
+    base = {"account_id": "ACC-S-00001", "profile_summary": "p", "transaction_summary": "t", "network_summary": "n",
+            "case_history_summary": "c", "detection_summary": "d"}
+    listed = EvidenceSummary(**base, citations=[{"claim": "three deposits", "ids": ["TXN1", "TXN2"]},
+                                               {"claim": "three deposits", "ids": ["TXN3"]}, {"claim": " ", "ids": ["X"]}])
+    assert listed.citations == {"three deposits": ["TXN1", "TXN2", "TXN3"]}
+    assert EvidenceSummary(**base, citations={"a": ["TXN9"]}).citations == {"a": ["TXN9"]}
+    assert EvidenceSummary(**base).model_dump()["citations"] == {}
+
+
+def test_empty_citations_are_rebuilt_from_the_ids_named_in_the_summary():
+    from aml_copilot.agents.evidence import with_derived_citations
+
+    summary = EvidenceSummary(
+        account_id="ACC-S-00001", profile_summary="A teacher.", transaction_summary="Deposits TXN099482 and TXN099483.",
+        network_summary="None.", case_history_summary="CASE-H-000001 was closed.", detection_summary="Score 100.",
+    )
+    rebuilt = with_derived_citations(summary)
+    assert rebuilt.citations["transaction (ids named in the summary)"] == ["TXN099482", "TXN099483"]
+    assert rebuilt.citations["case history (ids named in the summary)"] == ["CASE-H-000001"]
+
+
+def test_citations_the_model_did_provide_are_left_alone():
+    from aml_copilot.agents.evidence import with_derived_citations
+
+    summary = EvidenceSummary(
+        account_id="ACC-S-00001", profile_summary="p", transaction_summary="TXN1", network_summary="n",
+        case_history_summary="c", detection_summary="d", citations={"claim": ["TXN1"]},
+    )
+    assert with_derived_citations(summary) is summary

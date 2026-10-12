@@ -2,3 +2,4 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 -r ../requirements-core.txt
 sentence-transformers>=6.1,<7
+langchain-google-vertexai>=3.2,<4   # Gemini on Vertex AI (also brings google-auth for the keyless login)

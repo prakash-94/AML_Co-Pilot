@@ -1,6 +1,7 @@
 """What the model calls cost, and a hard spending cap.
 
-Prices are US dollars per million tokens (input, output), from Anthropic's published pricing.
+Prices are US dollars per million tokens (input, output) from the providers' published pricing (Gemini prices from
+third-party trackers of Google's list - confirm on Google's page before relying on them for budgeting).
 """
 
 from collections.abc import Mapping
@@ -10,7 +11,10 @@ from aml_copilot.errors import AMLCopilotError
 
 # (input, output) per million tokens. Keys are matched as substrings of the model name the API
 # reports, e.g. "claude-haiku-4-5-20251001" contains "haiku".
-PRICE_PER_MILLION = {"haiku": (1.00, 5.00), "sonnet": (2.00, 10.00)}
+PRICE_PER_MILLION = {
+    "haiku": (1.00, 5.00), "sonnet": (2.00, 10.00),
+    "gemini-3.1-pro": (2.00, 12.00), "gemini-3.5-flash": (1.50, 9.00),
+}
 
 
 class BudgetExceededError(AMLCopilotError):
@@ -25,7 +29,10 @@ def usage_cost(usage_metadata: Mapping[str, Mapping[str, Any]]) -> float:
         if family is None:
             raise ValueError(f"No price known for model {model!r}")
         price_in, price_out = PRICE_PER_MILLION[family]
-        total += usage.get("input_tokens", 0) * price_in / 1e6 + usage.get("output_tokens", 0) * price_out / 1e6
+        # Gemini bills its hidden thinking tokens as output, but reports them apart from `output_tokens`.
+        thinking = (usage.get("output_token_details") or {}).get("reasoning", 0)
+        output = usage.get("output_tokens", 0) + thinking
+        total += usage.get("input_tokens", 0) * price_in / 1e6 + output * price_out / 1e6
     return total
 
 

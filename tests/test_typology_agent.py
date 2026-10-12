@@ -260,7 +260,7 @@ def test_match_typology_checks_the_api_key_before_loading_the_embedding_model(mo
 
     monkeypatch.setattr(typology, "default_embedder", forbidden)
     with pytest.raises(ConfigError, match="ANTHROPIC_API_KEY"):
-        match_typology(evidence(), risk(), settings=Settings(_env_file=None))
+        match_typology(evidence(), risk(), settings=Settings(_env_file=None, llm_provider="anthropic"))
 
 
 def test_prompt_sets_the_grounding_rules_found_necessary_in_live_testing():

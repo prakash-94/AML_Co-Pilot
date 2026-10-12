@@ -12,7 +12,7 @@ from aml_copilot.service.jobs import JobStore
 DEFAULT_SCOPE = "aml-copilot"
 DEFAULT_SCHEMA = "workspace.aml_copilot"
 # Secret-scope key == environment variable name == the Settings field (case-insensitive).
-SECRET_NAMES = ("ANTHROPIC_API_KEY", "SF_PASSWORD", "SF_SECURITY_TOKEN", "SUPABASE_DB_URL", "DATABRICKS_CLIENT_SECRET")
+SECRET_NAMES = ("SF_PASSWORD", "SF_SECURITY_TOKEN", "SUPABASE_DB_URL", "DATABRICKS_CLIENT_SECRET")
 
 RoleLookup = Callable[[str], str | None]
 

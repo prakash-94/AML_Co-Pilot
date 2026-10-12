@@ -155,7 +155,7 @@ def settings_for(model):
 
     from aml_copilot.config import Settings
 
-    return Settings(_env_file=None, anthropic_api_key=SecretStr("sk-test"), anthropic_model=model)
+    return Settings(_env_file=None, llm_provider="anthropic", anthropic_api_key=SecretStr("sk-test"), anthropic_model=model)
 
 
 @pytest.mark.parametrize("model", ["claude-haiku-4-5", "claude-sonnet-4-6"])
@@ -215,7 +215,7 @@ def test_a_missing_key_fails_before_any_model_is_built(captured):
     from aml_copilot.errors import ConfigError
 
     with pytest.raises(ConfigError, match="ANTHROPIC_API_KEY"):
-        make_chat_model(Settings(_env_file=None))
+        make_chat_model(Settings(_env_file=None, llm_provider="anthropic"))
     assert captured == []
 
 

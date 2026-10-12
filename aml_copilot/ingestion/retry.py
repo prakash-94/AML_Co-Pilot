@@ -22,7 +22,8 @@ from tenacity import (
     Retrying,
     retry_if_exception,
     stop_after_attempt,
-    wait_exponential_jitter,
+    wait_exponential,
+    wait_random,
 )
 
 log = structlog.get_logger()
@@ -75,7 +76,9 @@ def call_with_retry(
     """
     retrying = Retrying(
         stop=stop_after_attempt(max(1, policy.attempts)),
-        wait=wait_exponential_jitter(multiplier=policy.initial_wait, max=policy.max_wait),
+        # Exponential back-off plus up to a second of jitter. Written with wait_exponential + wait_random because
+        # their arguments are the same in every tenacity release (google-genai pins tenacity below 9.2).
+        wait=wait_exponential(multiplier=policy.initial_wait, max=policy.max_wait) + wait_random(0, 1),
         retry=retry_if_exception(is_transient),
         before_sleep=_log_retry(source),
         reraise=True,

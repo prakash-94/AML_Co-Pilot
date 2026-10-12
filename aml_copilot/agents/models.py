@@ -3,7 +3,7 @@
 import json
 from typing import Annotated, Literal, TypeVar
 
-from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo
+from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, WithJsonSchema
 
 
 def _lone_string_to_list(value: object) -> object:
@@ -13,6 +13,40 @@ def _lone_string_to_list(value: object) -> object:
         return [value] if value.strip() else []
     return value
 
+
+def _citation_list_to_dict(value: object) -> object:
+    """The model is shown `citations` as a list of {claim, ids} objects (see `Citations`); store it as claim -> ids.
+    A plain dict (older saved runs, tests, other models) is accepted unchanged."""
+    if not isinstance(value, list):
+        return value
+    out: dict[str, list[str]] = {}
+    for item in value:
+        if isinstance(item, dict):
+            claim, ids = item.get("claim"), item.get("ids")
+            if isinstance(claim, str) and claim.strip():
+                out.setdefault(claim.strip(), [])
+                out[claim.strip()].extend(ids if isinstance(ids, list) else [ids] if isinstance(ids, str) else [])
+    return out
+
+
+# A free-form map (claim -> ids) cannot be described in Gemini's function-calling schema (no "additionalProperties"), so the
+# model was shown an empty object and answered {}. The model-facing shape is therefore a list of {claim, ids}; the stored
+# shape stays a dict.
+Citations = Annotated[
+    dict[str, list[str]],
+    BeforeValidator(_citation_list_to_dict),
+    WithJsonSchema({
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "claim": {"type": "string", "description": "A short paraphrase of one factual claim"},
+                "ids": {"type": "array", "items": {"type": "string"}, "description": "transaction_id / case_id values supporting it"},
+            },
+            "required": ["claim", "ids"],
+        },
+    }),
+]
 
 T = TypeVar("T")
 
@@ -64,10 +98,10 @@ class EvidenceSummary(BaseModel):
     data_completeness: StringList = Field(
         default_factory=list, description="Gaps in the evidence: missing sources, truncated results, no profile"
     )
-    citations: dict[str, list[str]] = Field(
+    citations: Citations = Field(
         default_factory=dict,
-        description="Claim key -> supporting transaction_id / case_id values, e.g. "
-        '{"three cash deposits near $8,000": ["TXN-001", "TXN-002", "TXN-003"]}',
+        description="One entry per factual claim: the claim, and the transaction_id / case_id values that support it, e.g. "
+        '[{"claim": "three cash deposits near $8,000", "ids": ["TXN-001", "TXN-002", "TXN-003"]}]',
     )
 
 

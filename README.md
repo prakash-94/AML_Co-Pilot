@@ -12,7 +12,7 @@ project, not a compliance product.
 
 ```
  account id ──► Evidence Agent ──► Typology / RAG Agent ──► Narrative Agent ──► Faithfulness check ──► human review
-                 │ 3 live sources     │ matches the evidence    │ drafts the SAR      │ Claude must QUOTE the
+                 │ 3 live sources     │ matches the evidence    │ drafts the SAR      │ the model must QUOTE the
                  │ rule-based risk    │ to written typologies   │ narrative from the  │ evidence for every
                  │ score (no ML)      │ (FinCEN / FATF docs)    │ evidence, nothing   │ sentence; code checks
                  ▼                    ▼                         ▼ else                ▼ the quote exists
@@ -28,22 +28,30 @@ project, not a compliance product.
   found nowhere in the evidence.
 * **Faithfulness**: a second model call fact-checks every sentence and must quote the supporting evidence;
   plain code verifies the quote really exists.
-* Models: Claude Haiku 4.5 summarises evidence; Claude Sonnet 5 judges typologies, writes and fact-checks.
+* Models: Google Gemini on Vertex AI. Gemini 3.5 Flash summarises the evidence; Gemini 3.1 Pro (preview) judges
+  typologies, writes the narrative and fact-checks it. (Claude through the Anthropic API or Vertex is still supported by
+  setting `LLM_PROVIDER`; the earlier measurements below were made with Claude.)
 
-## Measured results (21 accounts, saved in `evaluation_results/phase5_report.md`)
+## Measured results (the same 21 synthetic accounts, run twice)
 
-| Measure | Result |
-|---|---|
-| Risk tier correct | 100% |
-| Typology precision / recall | 100% / 100% |
-| False alarms on normal accounts | 0% |
-| Draft sentences supported by evidence | 99% of 236 |
-| Drafts passing the fact check outright | 80% (the rest are flagged for a human) |
-| Planted errors caught by the Sonnet fact-checker | 68 of 68 (3% false alarms; Haiku flagged 35% of true sentences) |
-| Cost per investigation | about 2–6 US cents |
+| Measure | Claude (Haiku 4.5 + Sonnet 5) | Gemini (3.5 Flash + 3.1 Pro) |
+|---|---|---|
+| Risk tier correct | 100% | 100% |
+| Typology precision / recall | 100% / 100% | 100% / 100% |
+| False alarms on normal accounts | 0% | 0% |
+| Draft sentences supported by evidence | 99% of 236 | 97% of 203 |
+| Drafts passing the fact check outright | 80% | 67% |
+| Planted errors caught by the fact-checker | 68 of 68 (3% false alarms) | 69 of 69 (1.3% false alarms) |
+| Cost of the 21-account run | $2.63 | $3.36 |
+| Average time per account | about 30 seconds | about 150 seconds |
 
-Not measured: behaviour on real bank data, agreement with human investigators, latency under load. The sample
-is small and synthetic; treat these as regression baselines, not accuracy claims.
+The fact-checker comparison uses the same drafts with errors planted in them. Gemini 3.5 Flash caught every planted
+error too, but also flagged 113 of 227 true sentences, so it is the summarizer and Gemini 3.1 Pro the judge.
+The reports are in `evaluation_results/` (`phase5_report.md` for Claude, `gemini_report.md` for Gemini). Gemini is
+slower and dearer mainly because Gemini 3.1 Pro "thinks" before answering and those hidden tokens are billed as output.
+
+Not measured: behaviour on real bank data, agreement with human investigators, latency under load. The sample is
+small and synthetic; treat these as regression baselines, not accuracy claims.
 
 ## The deployed system (Databricks)
 
@@ -52,7 +60,7 @@ Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.
 ```
  You ── Run now (account_id) ──► Job "aml-investigate"  (serverless Python, one run at a time)
                                    │ reads   Unity Catalog view transactions_safe (no label column), Salesforce, Supabase
-                                   │ calls   Claude through the Anthropic API (keys in a Databricks secret scope)
+                                   │ calls   Gemini on Vertex AI through a keyless Google login (Databricks token -> Google token)
                                    │ writes  Delta: documents (job + draft), audit_objects (append-only, hash-chained)
  You ── open notebook ─────────► "review": list / show / approve / reject / escalate   (runs AS the reviewer)
  Schedule (Mon 06:00 UTC) ─────► Job "aml-canary" ─► 7-account quality check ─► Delta eval_runs ─► fails on regression
@@ -103,7 +111,7 @@ pytest -q                                                       # 550 tests, no 
 
 * Only two typologies (structuring, layering) have rule-based detectors; the other five are retrieved by
   similarity only and are marked "no detector yet".
-* Databricks Free Edition has no Claude models, so Claude is called through the Anthropic API from the job. Claude on
+* Databricks Free Edition has no frontier models, so the job calls Gemini on Vertex AI. Gemini 3.1 Pro is a preview model. Claude on
   Vertex AI is implemented and tested offline, but Google has not granted this project quota.
 * The workspace has one user, so the roles are demonstrated with a `reviewers` table rather than several logins.
 * The service principal's OAuth secret expires after 90 days and must be rotated.

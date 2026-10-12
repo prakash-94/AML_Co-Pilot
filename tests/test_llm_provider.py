@@ -92,13 +92,13 @@ def test_vertex_needs_a_project_but_no_anthropic_key(fake_vertex):
 
 
 # ---------------------------------------------------------------- choosing / defaults
-def test_the_default_provider_is_still_the_anthropic_api():
-    assert Settings(_env_file=None).llm_provider == "anthropic" and PROVIDERS == ("anthropic", "vertex")
+def test_the_default_provider_is_gemini_on_vertex():
+    assert Settings(_env_file=None).llm_provider == "gemini" and PROVIDERS == ("gemini", "anthropic", "vertex")
 
 
 def test_the_anthropic_provider_still_demands_its_key(monkeypatch):
     with pytest.raises(ConfigError, match="ANTHROPIC_API_KEY"):
-        make_chat_model(Settings(_env_file=None))
+        make_chat_model(Settings(_env_file=None, llm_provider="anthropic"))
 
 
 def test_the_anthropic_provider_does_not_need_google_libraries(monkeypatch):
@@ -109,8 +109,9 @@ def test_the_anthropic_provider_does_not_need_google_libraries(monkeypatch):
             built.append(kwargs)
 
     monkeypatch.setattr("langchain_anthropic.ChatAnthropic", FakeChatAnthropic)
-    make_chat_model(Settings(_env_file=None, anthropic_api_key=SecretStr("sk-test")))
-    assert built[0]["model"] == "claude-sonnet-5"  # the default, untouched by the new provider code
+    make_chat_model(Settings(_env_file=None, llm_provider="anthropic", anthropic_api_key=SecretStr("sk-test"),
+                             anthropic_model="claude-sonnet-5"))
+    assert built[0]["model"] == "claude-sonnet-5"  # untouched by the new provider code
 
 
 def test_an_unknown_provider_is_a_clear_error():

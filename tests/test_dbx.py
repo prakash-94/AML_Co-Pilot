@@ -172,9 +172,9 @@ class FakeDbutils:
 
 def test_secrets_are_copied_into_the_environment_and_only_names_are_returned():
     env = {}
-    loaded = load_secrets(FakeDbutils({"ANTHROPIC_API_KEY": "sk-secret", "SF_PASSWORD": "pw"}), "scope", environ=env)
-    assert sorted(loaded) == ["ANTHROPIC_API_KEY", "SF_PASSWORD"]
-    assert env["ANTHROPIC_API_KEY"] == "sk-secret" and "sk-secret" not in str(loaded)
+    loaded = load_secrets(FakeDbutils({"SF_SECURITY_TOKEN": "sk-secret", "SF_PASSWORD": "pw"}), "scope", environ=env)
+    assert sorted(loaded) == ["SF_PASSWORD", "SF_SECURITY_TOKEN"]
+    assert env["SF_SECURITY_TOKEN"] == "sk-secret" and "sk-secret" not in str(loaded)
 
 
 def test_settings_are_applied_as_upper_case_environment_variables():
@@ -217,10 +217,10 @@ def patch_pipeline(monkeypatch, run=None):
 def test_the_investigate_job_runs_end_to_end_on_the_delta_fake(monkeypatch, capsys):
     patch_pipeline(monkeypatch)
     delta = FakeDelta()
-    code = jobs.investigate_main(["--account-id", ACCOUNT, "--set", "LLM_PROVIDER=anthropic"],
-                                 spark=FakeSpark(delta), dbutils=FakeDbutils({"ANTHROPIC_API_KEY": "k"}))
+    code = jobs.investigate_main(["--account-id", ACCOUNT, "--set", "LLM_PROVIDER=gemini"],
+                                 spark=FakeSpark(delta), dbutils=FakeDbutils({"SF_SECURITY_TOKEN": "k"}))
     out = capsys.readouterr().out
-    assert code == 0 and "RESULT ran" in out and "ANTHROPIC_API_KEY" in out and "k\n" not in out
+    assert code == 0 and "RESULT ran" in out and "SF_SECURITY_TOKEN" in out and "k\n" not in out
     assert len(delta.docs) >= 3 and len(delta.objects) == 3  # job + quota + lock documents; three audit events
 
 
