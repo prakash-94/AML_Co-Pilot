@@ -35,13 +35,14 @@
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
   .start { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 14px; }
   .start label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; }
   input, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; }
   input { width: 15em; max-width: 100%; font-family: var(--mono); }
   textarea { width: 100%; resize: vertical; }
   button { font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px; padding: 8px 14px; cursor: pointer; }
   button.quiet { background: transparent; color: var(--accent); border: 1px solid var(--line); }
   button:disabled { opacity: .45; cursor: not-allowed; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  select:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .msg { font-size: 13px; color: var(--muted); min-height: 1.3em; margin: 0; }
   .msg.err { color: var(--high); }
   .cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; align-items: start; }
@@ -62,6 +63,16 @@
   ul { margin: 0; padding-left: 18px; font-size: 13px; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   .hidden { display: none; }
+  .compare { margin-top: 14px; }
+  .compare-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .metrics { margin: 8px 0 14px; }
+  .metrics th { width: 22%; }
+  .metrics td { white-space: normal; }
+  .metrics .diff { background: color-mix(in srgb, var(--medium) 16%, transparent); }
+  .twin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .twin { grid-template-columns: minmax(0, 1fr); } }
+  .twin h3:first-child { margin-top: 0; }
+  .twin pre { max-height: 70vh; overflow: auto; }
   .small { font-size: 12px; color: var(--muted); }
   .good { color: var(--ok); } .bad { color: var(--high); }
 </style>
@@ -79,8 +90,17 @@
       <label for="account">Account id</label>
       <input id="account" placeholder="ACC-H-00000" autocapitalize="characters" autocomplete="off" spellcheck="false">
     </div>
+    <div>
+      <label for="provider">Model</label>
+      <select id="provider">
+        <option value="gemini">Gemini (Vertex AI)</option>
+        <option value="claude">Claude (Anthropic API)</option>
+        <option value="both">Both, then compare</option>
+      </select>
+    </div>
     <button id="start-btn" type="button">Investigate</button>
     <button id="refresh-btn" type="button" class="quiet">Refresh list</button>
+    <button id="compare-btn" type="button" class="quiet" disabled>Compare selected</button>
     <p class="msg" id="start-msg" role="status"></p>
   </section>
 
@@ -89,8 +109,8 @@
       <h2>Recent investigations</h2>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>Started</th><th>Account</th><th>Risk</th><th>Status</th></tr></thead>
-          <tbody id="rows"><tr><td colspan="4" class="small">Loading...</td></tr></tbody>
+          <thead><tr><th title="Tick two to compare"><span class="small">Cmp</span></th><th>Started</th><th>Account</th><th>Model</th><th>Risk</th><th>Status</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="6" class="small">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -127,6 +147,12 @@
       </div>
     </section>
   </div>
+
+  <section class="panel compare hidden" id="compare" aria-label="Compare two drafts">
+    <div class="compare-head"><h2 id="cmp-title">Comparison</h2><button id="cmp-close" type="button" class="quiet">Close</button></div>
+    <div class="tablewrap"><table class="metrics"><tbody id="cmp-metrics"></tbody></table></div>
+    <div class="twin"><div id="cmp-a"></div><div id="cmp-b"></div></div>
+  </section>
 </div>
 <script src="/static/app.js"></script>
 </body>

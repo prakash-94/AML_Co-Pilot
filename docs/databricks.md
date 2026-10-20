@@ -58,7 +58,16 @@ You can also press **Run now with different parameters** on the `aml-investigate
 The page is a Databricks App named `aml-copilot` (https://aml-copilot-7474648796792570.aws.databricksapps.com). Open it
 while signed in to Databricks. Type an account id and press **Investigate** (it asks Databricks to run the
 `aml-investigate` job as you), open any investigation to read the draft, fact check and audit trail, and approve, escalate
-or reject it. Only people in the `reviewers` table can use it; only a supervisor can approve.
+or reject it.
+
+**Gemini or Claude, and comparing them.** The **Model** drop-down chooses Gemini (Vertex AI), Claude (Anthropic API, Haiku 4.5
+summarizes and Sonnet 5 judges and writes) or **Both, then compare**. Both runs queue and run one after the other (the job
+allows one at a time), then the page opens the two drafts side by side with a table of the differences (typologies
+matched, sentences supported, fact check, warnings, time) highlighted. You can also tick any two investigations in the list
+and press **Compare selected**. Claude runs need `ANTHROPIC_API_KEY` in the secret scope (`python scripts/put_databricks_secrets.py`);
+without it a Claude run fails with a clear message and Gemini runs are unaffected. Each run is recorded with its model family.
+
+Only people in the `reviewers` table can use it; only a supervisor can approve.
 
 * Deploy or redeploy: `python scripts/dbx_deploy.py deploy` then `python scripts/dbx_deploy.py run copilot` (starts it).
 * First time only: `python scripts/grant_app_access.py` gives the app's own identity access to the service tables.

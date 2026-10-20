@@ -27,10 +27,10 @@ class FakeLauncher:
     def __init__(self):
         self.started, self.fail = [], False
 
-    def start(self, account_id, requested_by):
+    def start(self, account_id, requested_by, provider="gemini"):
         if self.fail:
             raise SourceUnavailableError("databricks jobs", "boom")
-        self.started.append((account_id, requested_by))
+        self.started.append((account_id, requested_by, provider))
         return {"run_id": 4242}
 
     def status(self, run_id):
@@ -111,12 +111,25 @@ def test_an_investigation_and_its_audit_trail_can_be_read_and_raw_rows_never_app
 def test_starting_asks_databricks_to_run_the_job_as_the_signed_in_person(world):
     response = world.client.post("/api/investigations", headers={**ANALYST, **SAME_ORIGIN}, json={"account_id": " acc-h-00000 "})
     assert response.status_code == 202 and response.json() == {"run_id": 4242}
-    assert world.launcher.started == [(ACCOUNT, "analyst@example.com")]
+    assert world.launcher.started == [(ACCOUNT, "analyst@example.com", "gemini")]  # Gemini unless the page says otherwise
 
 
 def test_a_forged_requester_in_the_body_is_ignored(world):
     world.client.post("/api/investigations", headers={**ANALYST, **SAME_ORIGIN}, json={"account_id": ACCOUNT, "requested_by": "boss@example.com"})
-    assert world.launcher.started == [(ACCOUNT, "analyst@example.com")]
+    assert world.launcher.started == [(ACCOUNT, "analyst@example.com", "gemini")]
+
+
+def test_the_page_can_pick_claude_and_an_unknown_model_family_is_refused(world):
+    ok = world.client.post("/api/investigations", headers={**BOSS, **SAME_ORIGIN}, json={"account_id": ACCOUNT, "provider": "claude"})
+    assert ok.status_code == 202 and world.launcher.started == [(ACCOUNT, "boss@example.com", "claude")]
+    bad = world.client.post("/api/investigations", headers={**BOSS, **SAME_ORIGIN}, json={"account_id": ACCOUNT, "provider": "gpt"})
+    assert bad.status_code == 422 and len(world.launcher.started) == 1
+
+
+def test_the_list_says_which_model_family_wrote_each_draft(world):
+    world.store.submit(new_job("j9", ACCOUNT, created_by="x", now=NOW, provider="claude"), now=NOW, daily_limit=9)
+    [item] = world.client.get("/api/investigations", headers=BOSS).json()
+    assert item["provider"] == "claude"
 
 
 @pytest.mark.parametrize("bad", ["ACC-X-00001", "", "ACC-S-00001' OR '1'='1"])
@@ -211,7 +224,7 @@ def test_the_launcher_runs_the_job_with_the_account_and_the_requester():
     assert launcher.start(ACCOUNT, "boss@example.com") == {"run_id": 99}
     method, url, kwargs = http.calls[0]
     assert (method, url) == ("POST", "https://dbc-1.cloud.databricks.com/api/2.1/jobs/run-now")
-    assert kwargs["json"] == {"job_id": 123, "job_parameters": {"account_id": ACCOUNT, "requested_by": "boss@example.com"}}
+    assert kwargs["json"] == {"job_id": 123, "job_parameters": {"account_id": ACCOUNT, "requested_by": "boss@example.com", "provider": "gemini"}}
     assert kwargs["headers"]["Authorization"] == "Bearer secret-token"
 
 

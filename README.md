@@ -77,7 +77,8 @@ Databricks App that serves the page and starts the job; it never runs an investi
   DELETE; each event carries the hash of the one before it.
 * **Web page.** `aml-copilot` is a Databricks App: Databricks signs the person in and tells the app who they are, the
   `reviewers` table gives their role, and the page starts the investigate job, shows the draft, fact check and audit
-  trail, and records the decision. Buttons that change data also require a same-origin header (cross-site forgery guard).
+  trail, and records the decision. A drop-down picks Gemini or Claude per run, and two drafts can be opened side
+  by side to compare them. Buttons that change data also require a same-origin header (cross-site forgery guard).
 * **Human decision.** The reviewer's identity is their real Databricks login, not a typed name (page, notebook or
   terminal). Roles come from the `reviewers` table; only a supervisor can approve. A decision
   is final and is tied to the exact draft by its SHA-256, so approving a draft that changed is refused.

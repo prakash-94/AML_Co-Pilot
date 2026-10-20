@@ -19,7 +19,9 @@ from typing import Annotated, Any, Protocol
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import field_validator
 
+from aml_copilot.dbx.providers import DEFAULT_PROVIDER, PROVIDERS
 from aml_copilot.dbx.review import ReviewError, decide
 from aml_copilot.dbx.runtime import RoleLookup
 from aml_copilot.errors import AMLCopilotError
@@ -39,11 +41,24 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 class RunLauncher(Protocol):
-    def start(self, account_id: str, requested_by: str) -> dict[str, Any]:
-        """Ask Databricks to run the investigate job; returns {"run_id": ...}."""
+    def start(self, account_id: str, requested_by: str, provider: str = DEFAULT_PROVIDER) -> dict[str, Any]:
+        """Ask Databricks to run the investigate job with this model family; returns {"run_id": ...}."""
 
     def status(self, run_id: int) -> dict[str, Any]:
         """The run's state: {"state": ..., "result": ..., "message": ...}."""
+
+
+class StartBody(StartRequest):
+    """What the page sends to start a run: the account (validated like everywhere else) and the model family."""
+
+    provider: str = DEFAULT_PROVIDER
+
+    @field_validator("provider")
+    @classmethod
+    def known_provider(cls, value: str) -> str:
+        if value not in PROVIDERS:
+            raise ValueError(f"provider must be one of {', '.join(PROVIDERS)}")
+        return value
 
 
 class Person:
@@ -117,7 +132,7 @@ def create_app(
     def recent(person: Me, limit: int = 25) -> list[dict[str, Any]]:
         return [
             {"job_id": j.job_id, "account_id": j.account_id, "status": j.status, "review_status": j.review_status,
-             "created_at": j.created_at, "created_by": j.created_by,
+             "created_at": j.created_at, "created_by": j.created_by, "provider": j.provider,
              "outcome": j.result.status if j.result else None,
              "tier": (j.result.risk_score or {}).get("tier") if j.result else None}
             for j in store.list_recent(max(1, min(limit, 100)))
@@ -135,9 +150,9 @@ def create_app(
                 "chain_ok": report.ok, "chain_problem": report.problem}
 
     @app.post("/api/investigations", status_code=202, dependencies=[Depends(require_same_origin)])
-    def start(body: StartRequest, person: Me) -> dict[str, Any]:
+    def start(body: StartBody, person: Me) -> dict[str, Any]:
         try:
-            return launcher.start(body.account_id, person.email)
+            return launcher.start(body.account_id, person.email, body.provider)
         except AMLCopilotError as exc:
             raise HTTPException(status_code=502, detail=str(exc)) from exc
 

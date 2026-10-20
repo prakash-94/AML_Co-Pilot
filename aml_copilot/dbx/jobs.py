@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from aml_copilot.dbx.investigate import investigate
+from aml_copilot.dbx.providers import DEFAULT_PROVIDER, PROVIDERS, provider_settings
 from aml_copilot.dbx.runtime import (
     DEFAULT_SCHEMA,
     DEFAULT_SCOPE,
@@ -55,8 +56,11 @@ def investigate_main(argv: Sequence[str], spark: Any = None, dbutils: Any = None
     parser.add_argument("--account-id", required=True)
     parser.add_argument("--requested-by", default="")
     parser.add_argument("--daily-limit", type=int, default=30)
+    parser.add_argument("--provider", choices=PROVIDERS, default=DEFAULT_PROVIDER,
+                        help="which model family answers this run (the web page's drop-down)")
     _common(parser)
     args = parser.parse_args(list(argv))
+    args.set = [*args.set, *provider_settings(args.provider)]  # a Claude run overrides the model settings
 
     spark, settings = _prepare(args, spark, dbutils)
     sql = spark_sql(spark)
@@ -71,7 +75,7 @@ def investigate_main(argv: Sequence[str], spark: Any = None, dbutils: Any = None
     print(f"vector index built: {build_index()} chunks", flush=True)
     report = investigate(
         args.account_id, requested_by, store=store, audit=audit, run=make_run_fn(settings),
-        clock=lambda: datetime.now(UTC), daily_limit=args.daily_limit, provenance=make_provenance(settings),
+        clock=lambda: datetime.now(UTC), daily_limit=args.daily_limit, provenance=make_provenance(settings), provider=args.provider,
     )
     print(f"RESULT {report.outcome}: job {report.job_id} - {report.detail}", flush=True)
     return 0 if report.ok else 1

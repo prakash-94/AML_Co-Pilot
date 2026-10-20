@@ -249,3 +249,35 @@ def test_provenance_names_the_model_for_each_step():
     assert p.models == {"evidence": "claude-haiku-4-5", "typology": "claude-haiku-4-5",
                         "narrative": "claude-sonnet-5", "faithfulness": "claude-haiku-4-5"}
     assert p.llm_provider == "vertex" and p.build == {"sha": "abc123"}
+
+
+# ------------------------------------------------------------------------------- choosing the model family
+def test_each_run_records_which_model_family_wrote_it():
+    store, audit = services()
+    investigate(ACCOUNT, "o@example.com", store=store, audit=audit, run=lambda a: finished_state(a), clock=lambda: NOW,
+                daily_limit=9, provider="claude", new_id=lambda: "jx")
+    assert store.get("jx").provider == "claude"
+    assert audit.events("jx")[0].details["provider"] == "claude"
+
+
+def test_a_claude_run_switches_the_model_settings_and_a_gemini_run_leaves_them(monkeypatch, capsys):
+    patch_pipeline(monkeypatch)
+    seen = {}
+    monkeypatch.setattr("aml_copilot.service.pipeline.make_provenance", lambda s: (seen.update(provider=s.llm_provider, judge=s.typology_model, summarizer=s.llm_model), None)[1])
+    jobs.investigate_main(["--account-id", ACCOUNT, "--provider", "claude", "--set", "LLM_PROVIDER=gemini"],
+                          spark=FakeSpark(FakeDelta()), dbutils=FakeDbutils({}))
+    assert seen == {"provider": "anthropic", "judge": "claude-sonnet-5", "summarizer": "claude-haiku-4-5"}
+    seen.clear()
+    jobs.investigate_main(["--account-id", ACCOUNT, "--set", "LLM_PROVIDER=gemini", "--set", "LLM_MODEL=gemini-3.5-flash"],
+                          spark=FakeSpark(FakeDelta()), dbutils=FakeDbutils({}))
+    assert seen["provider"] == "gemini" and seen["summarizer"] == "gemini-3.5-flash"
+
+
+def test_the_provider_must_be_known():
+    from aml_copilot.dbx.providers import provider_settings
+
+    assert provider_settings("gemini") == [] and "LLM_PROVIDER=anthropic" in provider_settings("claude")
+    with pytest.raises(ConfigError):
+        provider_settings("gpt")
+    with pytest.raises(SystemExit):
+        jobs.investigate_main(["--account-id", ACCOUNT, "--provider", "gpt"], spark=FakeSpark(FakeDelta()), dbutils=FakeDbutils({}))

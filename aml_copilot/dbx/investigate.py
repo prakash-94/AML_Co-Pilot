@@ -35,11 +35,12 @@ class InvestigationReport:
 def investigate(
     account_id: str, requested_by: str, *, store: JobStore, audit: AuditLog, run: RunFn,
     clock: Callable[[], datetime], daily_limit: int, provenance: Provenance | None = None,
-    new_id: Callable[[], str] = lambda: uuid.uuid4().hex,
+    new_id: Callable[[], str] = lambda: uuid.uuid4().hex, provider: str = "",
 ) -> InvestigationReport:
     account_id = validate_account_id(account_id)  # rejects anything that is not ACC-[S|L|N|H]-nnnnn
     now = clock()
-    job = new_job(new_id(), account_id, created_by=requested_by, created_by_email=requested_by, now=now)
+    job = new_job(new_id(), account_id, created_by=requested_by, created_by_email=requested_by, now=now,
+                  provider=provider)
     submitted = store.submit(job, now=now, daily_limit=daily_limit)
 
     if submitted.kind == "duplicate":
@@ -48,7 +49,7 @@ def investigate(
         return InvestigationReport("quota_exceeded", None, f"The daily limit of {daily_limit} investigations is reached")
 
     audit.append(job.job_id, "JOB_SUBMITTED", at=now.isoformat(), actor=requested_by,
-                 details={"account_id": account_id, "via": "databricks job"})
+                 details={"account_id": account_id, "via": "databricks job", "provider": provider})
     outcome = process_job(job.job_id, store=store, audit=audit, run=run, clock=clock, provenance=provenance)
     stored = store.get(job.job_id)
     if outcome != "ran" or stored is None or stored.result is None:

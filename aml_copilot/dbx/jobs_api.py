@@ -27,8 +27,9 @@ class JobsApiLauncher:
         except Exception as exc:
             raise SourceUnavailableError("databricks jobs", f"{type(exc).__name__}") from exc
 
-    def start(self, account_id: str, requested_by: str) -> dict[str, Any]:
-        body = {"job_id": self._job_id, "job_parameters": {"account_id": account_id, "requested_by": requested_by}}
+    def start(self, account_id: str, requested_by: str, provider: str = "gemini") -> dict[str, Any]:
+        params = {"account_id": account_id, "requested_by": requested_by, "provider": provider}
+        body = {"job_id": self._job_id, "job_parameters": params}
         return {"run_id": self._call("POST", "/api/2.1/jobs/run-now", json=body)["run_id"]}
 
     def status(self, run_id: int) -> dict[str, Any]:

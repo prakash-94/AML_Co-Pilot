@@ -70,6 +70,7 @@ class JobRecord(BaseModel):
     error: str | None = None
     decision: DecisionRecord | None = None
     request_id: str | None = None
+    provider: str = ""  # which model family answered: "gemini" or "claude" (blank for older records)
 
 
 # ------------------------------------------------------------------------------ the database
@@ -222,9 +223,10 @@ class JobStore:
 
 
 def new_job(job_id: str, account_id: str, *, created_by: str, created_by_email: str = "", now: datetime,
-            request_id: str | None = None) -> JobRecord:
+            request_id: str | None = None, provider: str = "") -> JobRecord:
     return JobRecord(job_id=job_id, account_id=account_id, created_by=created_by,
-                     created_by_email=created_by_email, created_at=now.isoformat(), request_id=request_id)
+                     created_by_email=created_by_email, created_at=now.isoformat(), request_id=request_id,
+                     provider=provider)
 
 
 __all__ = [

@@ -77,6 +77,8 @@ resources:
           default: ""
         - name: requested_by
           default: ""
+        - name: provider
+          default: gemini # or claude - chosen per run from the web page
       environments:
         - environment_key: default
           spec:
@@ -94,6 +96,8 @@ resources:
               - "{{job.parameters.account_id}}"
               - "--requested-by"
               - "{{job.parameters.requested_by}}"
+              - "--provider"
+              - "{{job.parameters.provider}}"
               - "--daily-limit"
               - ${var.daily_limit}
               - "--set"

@@ -2,8 +2,8 @@
 
     python scripts/put_databricks_secrets.py [--region us-east-2] [--dry-run]
 
-* SF_PASSWORD and SF_SECURITY_TOKEN go across unchanged. There is no model API key: Gemini is reached through a keyless
-  Google login (see docs/databricks.md).
+* ANTHROPIC_API_KEY (only used by runs that pick Claude), SF_PASSWORD and SF_SECURITY_TOKEN go across unchanged. Gemini needs no
+  key: it is reached through a keyless Google login (see docs/databricks.md).
 * SUPABASE_DB_URL is converted to Supabase's *pooler* address. The direct host (db.<ref>.supabase.co) is IPv6-only and
   Databricks serverless compute has no IPv6 route to it; the pooler (aws-0/aws-1-<region>.pooler.supabase.com) is IPv4.
   The script tries both pooler names with your real password and keeps the one that connects.
@@ -21,7 +21,7 @@ from dotenv import dotenv_values
 
 ROOT = Path(__file__).resolve().parent.parent
 SCOPE = "aml-copilot"
-PLAIN = ("SF_PASSWORD", "SF_SECURITY_TOKEN")
+PLAIN = ("ANTHROPIC_API_KEY", "SF_PASSWORD", "SF_SECURITY_TOKEN")
 
 
 def pooler_candidates(direct_url: str, region: str) -> list[str]:
