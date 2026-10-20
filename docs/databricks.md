@@ -54,7 +54,21 @@ python scripts/dbx_deploy.py run canary
 You can also press **Run now with different parameters** on the `aml-investigate` job in the Databricks UI and type an
 `account_id`.
 
-## Reviewing a draft
+## The web page
+The page is a Databricks App named `aml-copilot` (https://aml-copilot-7474648796792570.aws.databricksapps.com). Open it
+while signed in to Databricks. Type an account id and press **Investigate** (it asks Databricks to run the
+`aml-investigate` job as you), open any investigation to read the draft, fact check and audit trail, and approve, escalate
+or reject it. Only people in the `reviewers` table can use it; only a supervisor can approve.
+
+* Deploy or redeploy: `python scripts/dbx_deploy.py deploy` then `python scripts/dbx_deploy.py run copilot` (starts it).
+* First time only: `python scripts/grant_app_access.py` gives the app's own identity access to the service tables.
+* Try changes locally first: `python scripts/run_local_app.py` (opens http://localhost:8000 against the real workspace).
+* Limits on Free Edition: at most 3 apps, and an app stops after about 24 hours of running. If the page says it is
+  unavailable, run `python scripts/dbx_deploy.py run copilot` to start it again.
+* The page gets the shared code from `scripts/build_app.py`, which copies `aml_copilot/` next to the app's `main.py`
+  during every deploy.
+
+## Reviewing a draft (notebook)
 Open `Workspace > Users > you > .bundle > aml_copilot > prod > files > databricks > notebooks > review`, pick an
 **action** (`list`, `show`, `approve`, `reject`, `escalate`), paste the **investigation id**, write a **comment**, and run
 all cells. The notebook records you (your Databricks login) as the reviewer. `show` also verifies the audit chain.

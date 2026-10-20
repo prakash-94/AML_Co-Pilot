@@ -60,6 +60,11 @@ jobs:
 
       - uses: databricks/setup-cli@main
 
+      - name: Work out the warehouse id (the last part of its HTTP path)
+        run: echo "BUNDLE_VAR_warehouse_id=${DBX_HTTP_PATH##*/}" >> "$GITHUB_ENV"
+        env:
+          DBX_HTTP_PATH: ${{ vars.DATABRICKS_WAREHOUSE_HTTP_PATH }}
+
       - name: Validate the bundle
         run: databricks bundle validate
 

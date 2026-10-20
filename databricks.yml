@@ -10,6 +10,8 @@ bundle:
   name: aml_copilot
 
 variables:
+  warehouse_id:
+    description: Id of the SQL warehouse (the last part of its HTTP path); the web app gets permission to use it
   server_hostname:
     description: Workspace host name without https:// (the SQL connector wants the bare host)
   warehouse_http_path:
@@ -42,8 +44,13 @@ artifacts:
     type: whl
     build: python -m build --wheel
     path: .
+  app_package:
+    build: python scripts/build_app.py
+    path: .
 
 sync:
+  include:
+    - databricks/app/aml_copilot/**
   exclude:
     - tests
     - infra
@@ -200,6 +207,28 @@ resources:
         - task_key: refresh
           pipeline_task:
             pipeline_id: ${resources.pipelines.reporting.id}
+
+  apps:
+    copilot:
+      name: aml-copilot
+      description: Web page for the AML Investigation Copilot - start an investigation, read the draft, approve or reject it.
+      source_code_path: ./databricks/app
+      config:
+        command: ["python", "main.py"]
+        env:
+          - name: WAREHOUSE_ID
+            value_from: warehouse
+          - name: INVESTIGATE_JOB_ID
+            value_from: investigate-job
+      resources:
+        - name: warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: investigate-job
+          job:
+            id: ${resources.jobs.investigate.id}
+            permission: CAN_MANAGE_RUN
 
   pipelines:
     reporting:

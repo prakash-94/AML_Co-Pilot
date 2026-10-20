@@ -51,3 +51,6 @@ dist/
 *.egg-info/
 .databricks/
 logs_tmp/
+
+# Copied in by scripts/build_app.py before each deploy
+databricks/app/aml_copilot/

@@ -22,6 +22,7 @@ pandas>=3.0,<4
 # --- Data models and settings ---
 pydantic>=2.13,<3
 pydantic-settings>=2.15,<3
+fastapi>=0.141,<1               # the web page's server (aml_copilot/dbx/webapp.py)
 google-auth>=2.30,<3           # the keyless Google login (workload identity federation) used to call Gemini
 
 # --- Evaluation / guardrails ---

@@ -49,6 +49,7 @@ def main(argv: list[str]) -> int:
         "DATABRICKS_HOST": f"https://{host}",
         "DATABRICKS_TOKEN": token,
         "BUNDLE_VAR_server_hostname": host,
+        "BUNDLE_VAR_warehouse_id": (values.get("DATABRICKS_HTTP_PATH") or "").rstrip("/").split("/")[-1],
         "BUNDLE_VAR_warehouse_http_path": values.get("DATABRICKS_HTTP_PATH") or "",
         "BUNDLE_VAR_gcp_project": values.get("GCP_PROJECT") or "",
         "BUNDLE_VAR_gcp_wif_audience": values.get("GCP_WIF_AUDIENCE") or "",

@@ -1,0 +1,11 @@
+# Libraries for the web app (the aml_copilot package itself is copied next to main.py by scripts/build_app.py).
+fastapi>=0.141,<1
+uvicorn>=0.53,<1
+pydantic>=2.13,<3
+pydantic-settings>=2.15,<3
+httpx>=0.28,<1
+structlog>=26.1,<27
+tenacity>=8.5,<10
+python-dotenv>=1.2,<2
+databricks-sql-connector>=4.5,<5
+pandas>=3.0,<4

@@ -55,14 +55,16 @@ small and synthetic; treat these as regression baselines, not accuracy claims.
 
 ## The deployed system (Databricks)
 
-Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.yml`). There is no web server.
+Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.yml`). The only web server is a small
+Databricks App that serves the page and starts the job; it never runs an investigation itself.
 
 ```
- You ── Run now (account_id) ──► Job "aml-investigate"  (serverless Python, one run at a time)
+ You ── web page (Databricks App) ─┐
+                                  ├─ Run now (account_id) ─► Job "aml-investigate"  (serverless Python, one run at a time)
                                    │ reads   Unity Catalog view transactions_safe (no label column), Salesforce, Supabase
                                    │ calls   Gemini on Vertex AI through a keyless Google login (Databricks token -> Google token)
                                    │ writes  Delta: documents (job + draft), audit_objects (append-only, hash-chained)
- You ── open notebook ─────────► "review": list / show / approve / reject / escalate   (runs AS the reviewer)
+ You ── web page or notebook ──► list / show / approve / reject / escalate   (recorded under your Databricks login)
  Schedule (Mon 06:00 UTC) ─────► Job "aml-canary" ─► 7-account quality check ─► Delta eval_runs ─► fails on regression
  Schedule (daily 07:00 UTC) ───► Job "aml-refresh-reports" ─► Lakeflow pipeline "aml-reporting" (materialized views)
 ```
@@ -73,8 +75,11 @@ Everything runs inside one Databricks workspace as an Asset Bundle (`databricks.
 * **State in Delta.** `documents` holds job records with versioned, optimistic writes (`MERGE` that only succeeds if the
   version still matches). `audit_objects` is created with `delta.appendOnly = true`, so Delta itself refuses UPDATE and
   DELETE; each event carries the hash of the one before it.
-* **Human decision.** The review notebook runs as the person who opens it, so the reviewer's identity is their real
-  Databricks login, not a typed name. Roles come from the `reviewers` table; only a supervisor can approve. A decision
+* **Web page.** `aml-copilot` is a Databricks App: Databricks signs the person in and tells the app who they are, the
+  `reviewers` table gives their role, and the page starts the investigate job, shows the draft, fact check and audit
+  trail, and records the decision. Buttons that change data also require a same-origin header (cross-site forgery guard).
+* **Human decision.** The reviewer's identity is their real Databricks login, not a typed name (page, notebook or
+  terminal). Roles come from the `reviewers` table; only a supervisor can approve. A decision
   is final and is tied to the exact draft by its SHA-256, so approving a draft that changed is refused.
 * **Data governance.** Jobs read transactions as a service principal that can `SELECT` only the `transactions_safe`
   view. The ground-truth label and the base table are refused (tested live).
