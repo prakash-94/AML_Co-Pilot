@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-AML Investigation Copilot: given one flagged account id, a LangGraph pipeline (evidence -> typology/RAG -> narrative -> faithfulness check) drafts a SAR narrative **for a human to review**. It never files or decides anything. All data is synthetic. The deployed system is Databricks jobs plus one Databricks App web page; `README.md` and `docs/databricks.md` describe it in full.
+AML Investigation Copilot: given one flagged account id, a LangGraph pipeline (evidence -> typology/RAG -> narrative -> faithfulness check) drafts a SAR narrative **for a human to review**. It never files or decides anything. All data is synthetic. The deployed system is Databricks jobs plus one Databricks App web page; `README.md` and `docs/databricks.md` describe it in full. `FLOW.md` walks one investigation file by file; `DECISIONS.md` records why each choice was made, what was rejected and what broke.
 
 ## Commands
 
