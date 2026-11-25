@@ -229,7 +229,7 @@ How to read this file
 - The problem: Run the system somewhere other than a laptop.
 - Options considered:
 1. Google Cloud: Cloud Run, Cloud Tasks, Firestore, a locked-down Cloud Storage bucket, Firebase Hosting, Terraform - chosen
-2. UNKNOWN - the repository does not record which other clouds were compared. (A plan file outside the repository, `C:\Users\praka\.claude\plans\plan-how-to-deploy-cuddly-church.md`, may hold the comparison. Ask the owner whether it can be used as a source.)
+2. UNKNOWN - the repository does not record which other clouds were compared. (A plan file kept outside the repository, on the owner's computer, may hold the comparison. Ask the owner whether it can be used as a source.)
 - Decision: Google Cloud.
 - Why: UNKNOWN - ask the owner.
 - Trade-off we accepted: UNKNOWN
@@ -610,7 +610,7 @@ Status on 2026-11-23: the owner answered "I do not know" to the date and "who de
 4. D-010: who chose the model split and was a single model considered for the whole chain?
 5. D-011: was an evaluation library such as RAGAS considered? (The Phase 5 report mentions none.)
 6. D-015: why can only a supervisor approve?
-7. D-016: which other clouds were compared and why Google Cloud? May the plan file at `C:\Users\praka\.claude\plans\plan-how-to-deploy-cuddly-church.md` be used as a source?
+7. D-016: which other clouds were compared and why Google Cloud? May the deployment plan file kept outside the repository be used as a source?
 8. D-017: why move from Google Cloud to Databricks?
 9. D-021: why Gemini as the default rather than Claude through the Anthropic API?
 10. D-025: why a Databricks App rather than other web hosting?
