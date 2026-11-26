@@ -235,6 +235,21 @@ Weekly check: databricks/jobs/canary.py -> dbx/jobs.py: canary_main -> evaluatio
   - `agents/gcp_auth.py` says "Two modes" and lists four; `errors.py` still says the id format is `[S|L|N]` (the code also accepts `H`).
   - The CI workflow lints `aml_copilot`, `tests` and one script, while the deploy workflow lints the whole repository (`ruff check .`).
 
+## 8. Target: what "done" means (PLANNED, not built yet)
+The work toward production-level practice (D-030) on the branch `production-hardening` (D-035) is done when all of these are true. Nothing in this section describes how the system works today.
+- [ ] A cut-off money chain is visible on the draft and the report (whether it also changes the run status is not decided yet).
+- [ ] Claude calls have a deadline.
+- [ ] Every way of approving refuses a draft that changed after it was shown.
+- [ ] Every run records the code version, token use and an estimated cost.
+- [ ] A PDF can be downloaded for each case, marked as a draft and not a regulatory filing, with no raw transaction rows (D-031, D-034).
+- [ ] A manager summary PDF exists, showing time saved from a timed trial or "Not measured yet" (D-033).
+- [ ] A quality check with more accounts, including bad data, runs before release.
+- [ ] Customer names are protected before model calls, hostile text in data fields is tested, and a threat list is written.
+- [ ] Job failures raise alerts, there is a separate test target if Free Edition allows it, library versions are fixed, and a runbook exists.
+- [ ] A small batch has been timed and the one-run-at-a-time rule (D-019) has been reviewed.
+- [ ] The outdated text listed in section 7 is fixed.
+- [ ] The full test suite and lint pass, with no fewer than 577 tests.
+
 ## Corrections made on 2026-11-23 (FLOW.md checked against the code)
 Every backticked file and function name was checked to exist, and each step's call order was read in the code. All names exist. These statements were wrong or incomplete and are now fixed:
 1. Section 5 (and Step 1) said a network-expansion limit "marks the evidence incomplete". It does not: only a warning is added; the `complete` flag inside `Expansion` is never read (`ingestion/pipeline.py` uses only `net.warnings`). Also added to Section 7. DECISIONS.md D-004 had the same wrong wording and was corrected on 2026-11-23.

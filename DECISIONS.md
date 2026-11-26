@@ -420,6 +420,95 @@ How to read this file
 - Revisit when: UNKNOWN
 - Evidence: `LICENSE`, `.gitleaks.toml`, `.github/workflows/ci.yml`, commit `091955b`.
 
+## D-030 - "Production level" means production engineering practices on synthetic data
+- Date: 2026-11-25
+- Status: Accepted
+- The problem: The owner wants the project built the way an AI engineer would in a real implementation. "Production level" needed a definition.
+- Options considered:
+1. Production practices on synthetic data (safety fixes, tests, quality checks, tracing, alerts) - good: achievable alone, low cost, honest to show / bad: not proven on real bank data
+2. Real-company pilot ready (also separate environments, data hiding, real user accounts, monitoring, security review) - good: closest to a real trial / bad: much more work; parts need a client, approvals and likely paid services
+3. Demo ready only - good: fastest / bad: below the production level asked for
+- Decision: Option 1.
+- Why: The owner picked it from the pros and cons shown; no further reason was stated.
+- Trade-off we accepted: The result cannot be called ready for a bank.
+- Who decided: owner
+- Revisit when: real data or a real client is involved.
+- Evidence: owner's answer in the planning session on 2026-11-25.
+
+## D-031 - Reports: a PDF per case, a summary, and time saved
+- Date: 2026-11-25
+- Status: Accepted (not built yet)
+- The problem: The system produces no report file.
+- Options considered:
+1. A PDF per case - good: fixed layout, suits review records / bad: the reader cannot edit it
+2. A Word file per case - good: investigators can revise the wording / bad: an edited copy no longer matches the approved draft
+3. A case PDF plus a manager summary - good: serves investigators and managers / bad: more work; time saved is not measured
+- Decision: In the owner's words, a "PDF along with summary along with how much time we are saving": a PDF per case, a manager summary, and time saved.
+- Why: The owner asked for it; no further reason was stated.
+- Trade-off we accepted: More work than a case PDF alone. These PDFs are drafts for people to read, not the official filing to a regulator.
+- Who decided: owner
+- Revisit when: UNKNOWN
+- Evidence: owner's answer in the planning session on 2026-11-25. See D-033 and D-034.
+
+## D-032 - Stay on Databricks Free Edition
+- Date: 2026-11-25
+- Status: Accepted
+- The problem: Where should the production-level work run, and what can be spent?
+- Options considered:
+1. Free Edition, paying only for model calls - good: already working, lowest cost / bad: usage limits, the app stops after about 24 hours, one user
+2. A paid Databricks workspace - good: a better basis for separate environments, more users and longer running / bad: ongoing cost (not priced) and setup work
+- Decision: Option 1.
+- Why: The owner picked it from the pros and cons shown; no further reason was stated.
+- Trade-off we accepted: The Free Edition limits (see D-017).
+- Who decided: owner
+- Revisit when: a Free Edition limit blocks a planned step.
+- Evidence: owner's answer in the planning session on 2026-11-25.
+
+## D-033 - "Time saved" comes from a timed trial
+- Date: 2026-11-25
+- Status: Accepted (trial not run yet)
+- The problem: Time saved = time to do a case by hand minus time to review the system's draft. Neither human time has been measured, and the gap between a job's creation and its decision includes waiting.
+- Options considered:
+1. A timed trial (about 5 cases by hand and 5 reviews of drafts) - good: real measurements that can be defended / bad: takes hours, small sample, testers may not be trained investigators
+2. A stated assumption ("a manual case takes X minutes"), labelled as an estimate - good: quick / bad: only as reliable as X
+3. An estimate first, replaced by trial results - good: early demo and a path to real figures / bad: most work; the estimate may be remembered as fact
+- Decision: Option 1. Until the trial is done, reports say "Not measured yet".
+- Why: The owner picked it from the pros and cons shown; no further reason was stated.
+- Trade-off we accepted: No time-saved figure until people run the trial.
+- Who decided: owner
+- Revisit when: real investigators can take part, or the sample is too small to be believed.
+- Evidence: owner's answer in the planning session on 2026-11-25; `FLOW.md` section 7 (time saved not measured).
+
+## D-034 - Create the PDFs with ReportLab
+- Date: 2026-11-25
+- Status: Accepted (not added to the code yet)
+- The problem: Which tool should create the PDF reports?
+- Options considered:
+1. ReportLab - good: long-established, good tables and page layout / bad: more layout code; not yet tested in the Databricks App
+2. fpdf2 - good: small and easy to read / bad: fewer layout features
+3. A web page converted with WeasyPrint - good: easiest to style / bad: needs extra system software, hard on Windows and may not work in a Databricks App
+- Decision: Option 1.
+- Why: The owner picked it from the pros and cons shown; no further reason was stated.
+- Trade-off we accepted: More layout code.
+- Who decided: owner
+- Revisit when: ReportLab does not run in the Databricks App.
+- Evidence: owner's answer in the planning session on 2026-11-25.
+
+## D-035 - Do the work in the same project, on a new branch
+- Date: 2026-11-25
+- Status: Accepted
+- The problem: Build production-level work in this project or start again?
+- Options considered:
+1. Same project, new branch - good: the working version stays safe; tests, history and documents are kept / bad: branches and merging have to be learned
+2. Same project, directly on `main` - good: simplest / bad: unfinished or broken work lands in the demo version
+3. A new project from scratch - good: good for learning every piece / bad: much longer; old problems may need solving again
+- Decision: Option 1, branch `production-hardening`, merged into `main` later.
+- Why: The owner picked it from the pros and cons shown; no further reason was stated.
+- Trade-off we accepted: A branch separates code only. The bundle has one deploy target, so deploying from the branch replaces the live app. CI runs on pushes to `main` and on pull requests, so GitHub checks the branch only once a pull request is open.
+- Who decided: owner
+- Revisit when: the branch is ready to merge.
+- Evidence: owner's answer in the planning session on 2026-11-25; `databricks.yml` (one target, `prod`); `.github/workflows/ci.yml`.
+
 ## Challenge log
 
 ### C-001 - Structuring was missed by a short detection window
